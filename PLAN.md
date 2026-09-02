@@ -453,13 +453,13 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 16 — Paketleme
 
-- [ ] `npm pack` çıktısı incelenir: `dist/` içeriği, `files` alanı,
+- [x] `npm pack` çıktısı incelenir: `dist/` içeriği, `files` alanı,
       `exports` haritası (ESM+CJS+types üçü de çözülüyor mu)
-- [ ] `are-the-types-wrong` benzeri bir kontrol ile dual paket doğrulanır
-- [ ] Temiz bir projeye `npm i github:actos-dev/node` ile kurulup örnek çalıştırılır
-- [ ] ESM ve CJS tüketiciden ayrı ayrı `import`/`require` denenir
-- [ ] **npm yayını YOK** — backend prod'a çıkana kadar bilinçli olarak beklenir
-- [ ] Commit
+- [x] `are-the-types-wrong` benzeri bir kontrol ile dual paket doğrulanır
+- [x] Temiz bir projeye `npm i github:actos-dev/node` ile kurulup örnek çalıştırılır
+- [x] ESM ve CJS tüketiciden ayrı ayrı `import`/`require` denenir
+- [x] **npm yayını YOK** — backend prod'a çıkana kadar bilinçli olarak beklenir
+- [x] Commit
 
 ---
 
