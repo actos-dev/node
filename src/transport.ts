@@ -1,5 +1,5 @@
-import { ActosAPIError, APIConnectionError, APITimeoutError } from "./errors.js";
-import type { ErrorCode, RateLimit } from "./types.js";
+import { ActosAPIError, APIConnectionError, APITimeoutError, createAPIError } from "./errors.js";
+import type { RateLimit } from "./types.js";
 import { camelToSnake, snakeToCamel, stringCamelToSnake } from "./utils/case.js";
 import { VERSION } from "./version.js";
 
@@ -72,70 +72,19 @@ function parseRateLimit(headers: Headers): RateLimit | null {
   return { limit, remaining, reset };
 }
 
-function defaultCodeForStatus(status: number): ErrorCode {
-  switch (status) {
-    case 400:
-      return "VALIDATION_FAILED";
-    case 401:
-      return "MISSING_CREDENTIALS";
-    case 403:
-      return "FORBIDDEN";
-    case 404:
-      return "NOT_FOUND";
-    case 409:
-      return "CONFLICT";
-    case 410:
-      return "GONE";
-    case 415:
-      return "UNSUPPORTED_MEDIA";
-    case 429:
-      return "RATE_LIMITED";
-    default:
-      return "INTERNAL";
-  }
-}
-
-async function parseErrorResponse(res: Response, requestId: string | null): Promise<ActosAPIError> {
-  let rawBody: unknown;
-  let code: ErrorCode | string | undefined;
-  let detail: string | undefined;
-
+async function parseResponseBody(response: Response): Promise<unknown> {
+  const contentType = response.headers.get("content-type") || "";
   try {
-    rawBody = await res.json();
-    if (typeof rawBody === "object" && rawBody !== null) {
-      const obj = rawBody as Record<string, unknown>;
-      if (typeof obj.code === "string") {
-        code = obj.code;
-      }
-      if (typeof obj.detail === "string") {
-        detail = obj.detail;
-      } else if (typeof obj.title === "string") {
-        detail = obj.title;
-      }
+    if (
+      contentType.includes("application/json") ||
+      contentType.includes("application/problem+json")
+    ) {
+      return await response.json();
     }
+    return await response.text();
   } catch {
-    try {
-      const text = await res.text();
-      if (text) {
-        detail = text;
-        rawBody = text;
-      }
-    } catch {
-      // Body not readable
-    }
+    return undefined;
   }
-
-  if (!code) {
-    code = defaultCodeForStatus(res.status);
-  }
-
-  return new ActosAPIError({
-    status: res.status,
-    code,
-    detail,
-    requestId,
-    rawBody,
-  });
 }
 
 function computeBackoffDelay(attempt: number, retryAfterHeader?: string | null): number {
@@ -334,8 +283,15 @@ export class Transport {
           continue;
         }
 
-        // Other status codes or retries exhausted: throw ActosAPIError
-        const error = await parseErrorResponse(response, requestId);
+        // Other status codes or retries exhausted: throw specific ActosAPIError subclass
+        const errorData = await parseResponseBody(response);
+        const error = createAPIError({
+          status: response.status,
+          data: errorData,
+          headers: response.headers,
+          requestId,
+          rateLimit: this.rateLimit,
+        });
         throw error;
       } catch (err: unknown) {
         clearTimeout(timer);

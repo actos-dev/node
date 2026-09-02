@@ -336,15 +336,15 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 3 — Hata hiyerarşisi
 
-- [ ] `errors.ts`: §4'teki tüm sınıflar, `name` set edilir, `cause` korunur
-- [ ] `application/problem+json` gövdesini ayrıştırma; gövde bozuksa/boşsa
+- [x] `errors.ts`: §4'teki tüm sınıflar, `name` set edilir, `cause` korunur
+- [x] `application/problem+json` gövdesini ayrıştırma; gövde bozuksa/boşsa
       status'e göre makul bir sınıfa düşme
-- [ ] `code` → sınıf tablosu; bilinmeyen kod → `ActosAPIError`
-- [ ] `message`: `[404 NOT_FOUND] post not found (requestId=01a0…)`
-- [ ] Not: backend hata metinleri **İngilizce** (backend Faz 18.A). SDK bu
+- [x] `code` → sınıf tablosu; bilinmeyen kod → `ActosAPIError`
+- [x] `message`: `[404 NOT_FOUND] post not found (requestId=01a0…)`
+- [x] Not: backend hata metinleri **İngilizce** (backend Faz 18.A). SDK bu
       metinleri çevirmez, olduğu gibi taşır — yerelleştirme tüketicinin işi
-- [ ] Birim testleri: 12 kodun her biri doğru sınıfa eşleniyor
-- [ ] Commit
+- [x] Birim testleri: 12 kodun her biri doğru sınıfa eşleniyor
+- [x] Commit
 
 ## Faz 4 — İstemci ve sayfalama
 
