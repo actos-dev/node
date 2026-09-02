@@ -348,14 +348,14 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 4 — İstemci ve sayfalama
 
-- [ ] `Actos` sınıfı: `{ apiKey, baseUrl, timeout, maxRetries, fetch? }`
+- [x] `Actos` sınıfı: `{ apiKey, baseUrl, timeout, maxRetries, fetch? }`
       (`fetch` enjekte edilebilir — test ve özel runtime'lar için)
-- [ ] `apiKey` `toString()` ve `util.inspect` çıktısında maskelenir
-- [ ] `ACTOS_API_KEY` / `ACTOS_BASE_URL` ortam değişkeni desteği (Node'da)
-- [ ] `pagination.ts`: `Page<T>` (`items` + `nextCursor`) ve
+- [x] `apiKey` `toString()` ve `util.inspect` çıktısında maskelenir
+- [x] `ACTOS_API_KEY` / `ACTOS_BASE_URL` ortam değişkeni desteği (Node'da)
+- [x] `pagination.ts`: `Page<T>` (`items` + `nextCursor`) ve
       `AsyncIterable` üreteci; tüm `iterate*` metotları bunu kullanır
-- [ ] `client.request()` kaçış kapağı
-- [ ] Commit
+- [x] `client.request()` kaçış kapağı
+- [x] Commit
 
 ## Faz 5 — auth
 

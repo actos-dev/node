@@ -21,6 +21,16 @@ export interface RequestOptions {
   idempotencyKey?: string | null;
   signal?: AbortSignal;
   timeout?: number;
+  raw?: boolean;
+}
+
+export interface RawRequestInit {
+  query?: Record<string, unknown>;
+  body?: unknown;
+  headers?: Record<string, string>;
+  idempotencyKey?: string | null;
+  signal?: AbortSignal;
+  timeout?: number;
 }
 
 export interface TransportResponse<T> {
@@ -142,11 +152,11 @@ export class Transport {
         if (value === undefined || value === null) {
           continue;
         }
-        const snakeKey = stringCamelToSnake(key);
+        const paramKey = options.raw ? key : stringCamelToSnake(key);
         if (Array.isArray(value)) {
-          url.searchParams.set(snakeKey, value.map(String).join(","));
+          url.searchParams.set(paramKey, value.map(String).join(","));
         } else {
-          url.searchParams.set(snakeKey, String(value));
+          url.searchParams.set(paramKey, String(value));
         }
       }
     }
@@ -176,21 +186,44 @@ export class Transport {
 
     let requestBody: BodyInit | undefined;
     if (options.body !== undefined && options.body !== null) {
-      if (typeof FormData !== "undefined" && options.body instanceof FormData) {
-        requestBody = options.body;
-      } else if (typeof Blob !== "undefined" && options.body instanceof Blob) {
-        requestBody = options.body;
-        if (options.body.type && !headers.has("Content-Type")) {
-          headers.set("Content-Type", options.body.type);
+      if (options.raw) {
+        if (typeof options.body === "string") {
+          requestBody = options.body;
+          if (!headers.has("Content-Type")) {
+            headers.set("Content-Type", "application/json");
+          }
+        } else if (typeof FormData !== "undefined" && options.body instanceof FormData) {
+          requestBody = options.body;
+        } else if (typeof Blob !== "undefined" && options.body instanceof Blob) {
+          requestBody = options.body;
+          if (options.body.type && !headers.has("Content-Type")) {
+            headers.set("Content-Type", options.body.type);
+          }
+        } else if (options.body instanceof ArrayBuffer || ArrayBuffer.isView(options.body)) {
+          requestBody = options.body as unknown as BodyInit;
+        } else {
+          if (!headers.has("Content-Type")) {
+            headers.set("Content-Type", "application/json");
+          }
+          requestBody = JSON.stringify(options.body);
         }
-      } else if (options.body instanceof ArrayBuffer || ArrayBuffer.isView(options.body)) {
-        requestBody = options.body as unknown as BodyInit;
       } else {
-        if (!headers.has("Content-Type")) {
-          headers.set("Content-Type", "application/json");
+        if (typeof FormData !== "undefined" && options.body instanceof FormData) {
+          requestBody = options.body;
+        } else if (typeof Blob !== "undefined" && options.body instanceof Blob) {
+          requestBody = options.body;
+          if (options.body.type && !headers.has("Content-Type")) {
+            headers.set("Content-Type", options.body.type);
+          }
+        } else if (options.body instanceof ArrayBuffer || ArrayBuffer.isView(options.body)) {
+          requestBody = options.body as unknown as BodyInit;
+        } else {
+          if (!headers.has("Content-Type")) {
+            headers.set("Content-Type", "application/json");
+          }
+          const converted = camelToSnake(options.body);
+          requestBody = JSON.stringify(converted);
         }
-        const converted = camelToSnake(options.body);
-        requestBody = JSON.stringify(converted);
       }
     }
 
@@ -249,7 +282,7 @@ export class Transport {
             contentType.includes("application/problem+json")
           ) {
             const raw = await response.json();
-            data = snakeToCamel<T>(raw);
+            data = options.raw ? (raw as T) : snakeToCamel<T>(raw);
           } else {
             data = (await response.text()) as unknown as T;
           }
@@ -328,5 +361,23 @@ export class Transport {
     }
 
     throw new APIConnectionError("Max retries exhausted");
+  }
+
+  /**
+   * Raw escape hatch HTTP request without automatic case conversion.
+   */
+  async rawRequest<T>(method: string, path: string, init: RawRequestInit = {}): Promise<T> {
+    const res = await this.request<T>({
+      method,
+      path,
+      query: init.query,
+      body: init.body,
+      headers: init.headers,
+      idempotencyKey: init.idempotencyKey,
+      signal: init.signal,
+      timeout: init.timeout,
+      raw: true,
+    });
+    return res.data;
   }
 }
