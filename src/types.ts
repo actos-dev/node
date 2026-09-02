@@ -147,6 +147,22 @@ export interface CommentListResponse {
   nextCursor: string | null;
 }
 
+// Post Types
+export type PostField = keyof Post;
+
+export interface GetPostOptions<F extends keyof Post = keyof Post> {
+  fields?: F[];
+}
+
+export interface CreatePostOptions {
+  title: string;
+  body: string;
+  tags?: string[];
+  attachments?: string[];
+  metadata?: Record<string, unknown>;
+  idempotencyKey?: string | null;
+}
+
 // Request / Input Types
 export type CreatePostInput = Schema["CreatePostRequest"];
 export type UpdatePostInput = Schema["UpdatePostRequest"];

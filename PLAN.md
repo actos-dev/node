@@ -373,11 +373,11 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 7 — posts
 
-- [ ] `create` / `get` / `update` / `delete`
-- [ ] Otomatik `Idempotency-Key` (§2.9), `null` ile kapatılabilir
-- [ ] `fields` desteği — tip düzeyinde yalnızca geçerli alan adları kabul edilir
-- [ ] `delete` sonrası `get` → `GoneError` testi
-- [ ] Commit
+- [x] `create` / `get` / `update` / `delete`
+- [x] Otomatik `Idempotency-Key` (§2.9), `null` ile kapatılabilir
+- [x] `fields` desteği — tip düzeyinde yalnızca geçerli alan adları kabul edilir
+- [x] `delete` sonrası `get` → `GoneError` testi
+- [x] Commit
 
 ## Faz 8 — comments
 
