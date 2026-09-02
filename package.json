@@ -28,7 +28,8 @@
     "format": "biome format --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:types": "tsx scripts/generate-types.ts"
+    "generate:types": "tsx scripts/generate-types.ts",
+    "generate:types:check": "tsx scripts/generate-types.ts --check"
   },
   "dependencies": {},
   "devDependencies": {

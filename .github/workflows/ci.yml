@@ -29,6 +29,9 @@ jobs:
       - name: Lint and format check
         run: npm run lint
 
+      - name: Verify generated types
+        run: npm run generate:types:check -- --source ./openapi.json
+
       - name: Type check
         run: npm run typecheck
 

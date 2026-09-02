@@ -309,14 +309,14 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 1 — Tip üretim hattı
 
-- [ ] `scripts/generate-types.ts`: `GET /openapi.json` ya da yerel dosyadan
+- [x] `scripts/generate-types.ts`: `GET /openapi.json` ya da yerel dosyadan
       `openapi-typescript` ile `src/generated/schema.d.ts` üretir
-- [ ] `--check` modu: üretilip mevcut dosyayla karşılaştırılır, fark varsa
+- [x] `--check` modu: üretilip mevcut dosyayla karşılaştırılır, fark varsa
       sıfırdan farklı çıkış kodu (CI bunu çalıştırır)
-- [ ] `src/types.ts`: kullanıcıya sunulan takma adlar (`Post`, `Comment`,
+- [x] `src/types.ts`: kullanıcıya sunulan takma adlar (`Post`, `Comment`,
       `Actor`, `Tag`, `SearchResult`, `RateLimit`, `ErrorCode`, ...)
-- [ ] Üretilen dosya commit'lenir, başına "ÜRETİLDİ" uyarısı konur
-- [ ] Commit
+- [x] Üretilen dosya commit'lenir, başına "ÜRETİLDİ" uyarısı konur
+- [x] Commit
 
 ## Faz 2 — Taşıma katmanı
 
