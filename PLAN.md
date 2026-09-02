@@ -410,10 +410,10 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 12 — reports ve admin
 
-- [ ] `reports.create`
-- [ ] `admin.*` alt kaynakları (§3'teki 7 metot)
-- [ ] Yetkisiz çağrı → `ForbiddenError` testi
-- [ ] Commit
+- [x] `reports.create`
+- [x] `admin.*` alt kaynakları (§3'teki 7 metot)
+- [x] Yetkisiz çağrı → `ForbiddenError` testi
+- [x] Commit
 
 ## Faz 13 — inbox, doğrulama ve meta
 

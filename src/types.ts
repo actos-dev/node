@@ -192,11 +192,49 @@ export interface CommentThreadResponse {
 // Request / Input Types
 export type CreatePostInput = Schema["CreatePostRequest"];
 export type UpdatePostInput = Schema["UpdatePostRequest"];
-export type VoteInput = Schema["VoteRequest"];
-export type CreateReportInput = Schema["CreateReportRequest"];
-export type UpdateReportInput = Schema["UpdateReportRequest"];
-export type CreateBanInput = Schema["CreateBanRequest"];
-export type SetRoleInput = Schema["SetRoleRequest"];
+// Report & Admin Types
+export type ReportStatus = "pending" | "resolved" | "dismissed";
+export type AdminRole = "admin" | "moderator";
+
+export interface CreateReportInput {
+  targetType: "post" | "comment" | string;
+  targetId: string;
+  reason: string;
+}
+
+export interface ListAdminReportsParams extends PaginationParams {
+  status?: ReportStatus | string;
+}
+
+export interface UpdateReportInput {
+  status: "resolved" | "dismissed" | string;
+  notes?: string | null;
+}
+
+export interface ModerateDeleteInput {
+  reason: string;
+}
+
+export interface CreateBanInput {
+  username: string;
+  reason: string;
+  expiresAt?: string | null;
+}
+
+export interface SetRoleInput {
+  username: string;
+  role: AdminRole | null;
+}
+
+export interface ReportListResponse {
+  reports: Report[];
+  nextCursor?: string | null;
+}
+
+export interface AdminActionListResponse {
+  actions: AdminAction[];
+  nextCursor?: string | null;
+}
 
 // Error Codes
 export type ErrorCode =
