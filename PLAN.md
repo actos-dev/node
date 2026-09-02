@@ -52,6 +52,27 @@ Bu paketin en güçlü satış argümanı bu olabilir: Node 20+ `fetch`, `FormDa
 Bir bağımlılık eklemek isteyen adım, önce bu maddeyi gerekçeyle çürütmek
 zorunda.
 
+### 0.3. Bugün kodlanamayacaklar — backend Faz 18.A bekliyor
+
+Backend `PLAN.md` Faz 18.A henüz uygulanmadı. **Canlı `GET /openapi.json`
+otoritedir:** bu planın §3'ünde listelenip spec'te bulunmayan hiçbir uç ya da
+alan için kod yazılmaz, uydurulmaz.
+
+Bugün atlanacaklar, planda `[ ]` bırakılır:
+
+| Ne | Nerede |
+|---|---|
+| `inbox.*` ve `verifications.*` | Faz 13.B |
+| `actors.updateMe`'in `avatar` parametresi | Faz 6 |
+| `feed.list`'in `actorType` parametresi | Faz 9 |
+
+Backend Faz 18.A bitince tipler yeniden üretilir ve bu parçalar ikinci bir
+geçişte eklenir.
+
+**Spec nerede:** `actos-backend/docs/openapi.json` — repoda commit'li, sunucu
+ayağa kaldırmana gerek yok. Canlı doğrulama yapacaksan backend'de
+`docker compose up -d` + `cargo run -p actos-api` ile `127.0.0.1:3100`.
+
 **Açık bırakılan (v1'de karar verilecek):** tarayıcı hedefinin resmî destek
 kapsamına alınıp alınmayacağı (CORS açık olduğu için teknik engel yok),
 React/Next.js için ayrı bir `actos/react` alt yolu.
@@ -415,9 +436,19 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [x] Yetkisiz çağrı → `ForbiddenError` testi
 - [x] Commit
 
-## Faz 13 — inbox, doğrulama ve meta
+## Faz 13 — meta, inbox ve doğrulama
 
-> **Bağımlı:** backend Faz 18.A (`GET /me/inbox`). Tamamlanmadan başlatılmaz.
+### 13.A — meta ve kota (bağımsız, bugün yapılabilir)
+
+- [x] `meta.health/ready/version/openapi`
+- [x] `client.rateLimit` — son yanıttan; hiç istek atılmadıysa `null`
+- [x] `version()` SDK sürümü + sunucu sürümünü birlikte verir
+- [x] Commit (13.A) — Faz 14 commit'ine (a381a71) dahil edildi
+
+### 13.B — inbox ve doğrulama (BLOKE — backend Faz 18.A)
+
+> Bu bölüm backend Faz 18.A tamamlanmadan **başlatılmaz.** Uçlar canlı
+> spec'te yokken kod yazılmaz; bkz. §0.3.
 
 - [ ] `inbox.list/iterate/read/readAll/unreadCount`
 - [ ] `readAll` **idempotent**: iki kez çağırmak hata vermez
@@ -428,11 +459,7 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
       durdurulabilir — durduramayan bir akış sızıntıdır
 - [ ] `verifications.create/check/list/delete` (alan adı doğrulaması)
 - [ ] Yükleme kotası aşımı (backend Faz 18.A) anlamlı hataya eşlenir
-
-- [x] `meta.health/ready/version/openapi`
-- [x] `client.rateLimit` — son yanıttan; hiç istek atılmadıysa `null`
-- [x] `version()` SDK sürümü + sunucu sürümünü birlikte verir
-- [ ] Commit
+- [ ] Commit (13.B)
 
 ## Faz 14 — Sözleşme test paketi
 
