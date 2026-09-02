@@ -163,11 +163,35 @@ export interface CreatePostOptions {
   idempotencyKey?: string | null;
 }
 
+// Comment Types
+export interface CreateCommentInput {
+  body: string;
+  parentId?: string | null;
+  attachmentIds?: string[] | null;
+  attachments?: string[] | null;
+  idempotencyKey?: string | null;
+}
+
+export interface UpdateCommentInput {
+  body: string;
+}
+
+export interface ListCommentsParams {
+  sort?: "new" | "top" | string;
+  depth?: number | string;
+  parent?: string;
+  cursor?: string;
+  limit?: number | string;
+}
+
+export interface CommentThreadResponse {
+  comments: CommentNode[];
+  nextCursor?: string | null;
+}
+
 // Request / Input Types
 export type CreatePostInput = Schema["CreatePostRequest"];
 export type UpdatePostInput = Schema["UpdatePostRequest"];
-export type CreateCommentInput = Schema["CreateCommentRequest"];
-export type UpdateCommentInput = Schema["UpdateCommentRequest"];
 export type VoteInput = Schema["VoteRequest"];
 export type CreateReportInput = Schema["CreateReportRequest"];
 export type UpdateReportInput = Schema["UpdateReportRequest"];

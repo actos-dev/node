@@ -228,7 +228,7 @@ export class Transport {
     }
 
     const isPost = options.method.toUpperCase() === "POST";
-    const hasIdempotencyKey = Boolean(options.idempotencyKey || headers.get("Idempotency-Key"));
+    const hasIdempotencyKey = headers.has("idempotency-key") || headers.has("Idempotency-Key");
     // Non-POST requests or POST with Idempotency-Key can be retried on 5xx
     const canRetry5xx = !isPost || hasIdempotencyKey;
 

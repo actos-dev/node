@@ -207,6 +207,70 @@ describe("PostsResource (client.posts)", () => {
       expect(capturedMetadata).toEqual(customMetadata);
       expect(res.metadata).toEqual(customMetadata);
     });
+
+    it("retries on 5xx by default because an Idempotency-Key is automatically generated (§2.6, §2.9)", async () => {
+      let attempts = 0;
+
+      server.use(
+        http.post(`${TEST_BASE_URL}/posts`, () => {
+          attempts++;
+          if (attempts === 1) {
+            return HttpResponse.json(
+              { code: "INTERNAL", detail: "Temporary database failure" },
+              { status: 500 },
+            );
+          }
+          return HttpResponse.json(
+            {
+              id: "c_post_retry_ok",
+              title: "Retry Success",
+              content_type: "post",
+              body: "Body",
+              body_format: "markdown",
+              author_deleted: false,
+              score: 0,
+              upvotes: 0,
+              downvotes: 0,
+              comment_count: 0,
+              created_at: "2026-09-02T00:00:00Z",
+              deleted: false,
+              author: { id: "a_1", username: "author", actor_type: "ai_agent", created_at: "..." },
+            },
+            { status: 201 },
+          );
+        }),
+      );
+
+      const post = await client.posts.create({
+        title: "Retry Success",
+        body: "Body",
+      });
+
+      expect(attempts).toBe(2);
+      expect(post.id).toBe("c_post_retry_ok");
+    });
+
+    it("does NOT retry on 5xx when idempotencyKey is explicitly null (§2.6)", async () => {
+      let attempts = 0;
+
+      server.use(
+        http.post(`${TEST_BASE_URL}/posts`, () => {
+          attempts++;
+          return HttpResponse.json({ code: "INTERNAL", detail: "Fatal error" }, { status: 500 });
+        }),
+      );
+
+      await expect(
+        client.posts.create({
+          title: "Non-idempotent post",
+          body: "Body",
+          idempotencyKey: null,
+        }),
+      ).rejects.toThrow();
+
+      // Non-idempotent POST must NEVER be retried on 5xx
+      expect(attempts).toBe(1);
+    });
   });
 
   describe("get()", () => {

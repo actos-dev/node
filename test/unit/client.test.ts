@@ -84,8 +84,6 @@ describe("Actos Client", () => {
     expect(client.reports).toBeDefined();
     expect(client.admin).toBeDefined();
     expect(client.meta).toBeDefined();
-    expect(client.inbox).toBeDefined();
-    expect(client.verifications).toBeDefined();
   });
 
   it("delegates rateLimit to transport", () => {

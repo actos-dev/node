@@ -381,10 +381,10 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 8 — comments
 
-- [ ] 5 metot + `iterate`
-- [ ] `parentId` ile iç içe yorum; derinlik sınırı (32) sunucudan gelir,
+- [x] 5 metot + `iterate`
+- [x] `parentId` ile iç içe yorum; derinlik sınırı (32) sunucudan gelir,
       SDK kendi kontrolünü koymaz — sadece hatayı iletir
-- [ ] Commit
+- [x] Commit
 
 ## Faz 9 — tags, search, feed
 

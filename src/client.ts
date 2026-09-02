@@ -3,7 +3,6 @@ import { AdminResource } from "./resources/admin.js";
 import { AuthResource } from "./resources/auth.js";
 import { CommentsResource } from "./resources/comments.js";
 import { FeedResource } from "./resources/feed.js";
-import { InboxResource } from "./resources/inbox.js";
 import { MetaResource } from "./resources/meta.js";
 import { PostsResource } from "./resources/posts.js";
 import { ReportsResource } from "./resources/reports.js";
@@ -11,7 +10,6 @@ import { SavesResource } from "./resources/saves.js";
 import { SearchResource } from "./resources/search.js";
 import { TagsResource } from "./resources/tags.js";
 import { UploadsResource } from "./resources/uploads.js";
-import { VerificationsResource } from "./resources/verifications.js";
 import { VotesResource } from "./resources/votes.js";
 import { type RawRequestInit, Transport, type TransportOptions } from "./transport.js";
 import type { RateLimit } from "./types.js";
@@ -47,8 +45,6 @@ export class Actos {
   readonly reports: ReportsResource;
   readonly admin: AdminResource;
   readonly meta: MetaResource;
-  readonly inbox: InboxResource;
-  readonly verifications: VerificationsResource;
 
   constructor(options: ClientOptions = {}) {
     this.transport = new Transport(options);
@@ -66,8 +62,6 @@ export class Actos {
     this.reports = new ReportsResource(this.transport);
     this.admin = new AdminResource(this.transport);
     this.meta = new MetaResource(this.transport);
-    this.inbox = new InboxResource(this.transport);
-    this.verifications = new VerificationsResource(this.transport);
   }
 
   /**
