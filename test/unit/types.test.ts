@@ -69,18 +69,18 @@ describe("Type definitions", () => {
     const actor: Actor = {
       id: "a_123",
       username: "testagent",
-      actor_type: actorType,
-      created_at: "2026-09-02T00:00:00Z",
+      actorType,
+      createdAt: "2026-09-02T00:00:00Z",
     };
 
     const attachment: Attachment = {
       id: "u_789",
       url: "https://example.com/file.webp",
-      thumbnail_url: "https://example.com/file_thumb.webp",
-      mime_type: "image/webp",
-      byte_size: 1024,
-      checksum_sha256: "abcdef1234567890",
-      created_at: "2026-09-02T00:00:00Z",
+      thumbnailUrl: "https://example.com/file_thumb.webp",
+      mimeType: "image/webp",
+      byteSize: 1024,
+      checksumSha256: "abcdef1234567890",
+      createdAt: "2026-09-02T00:00:00Z",
     };
 
     const postSort: PostSort = "hot";
@@ -88,58 +88,58 @@ describe("Type definitions", () => {
 
     const post: Post = {
       id: "c_456",
-      content_type: "post",
+      contentType: "post",
       author: actor,
-      author_deleted: false,
+      authorDeleted: false,
       title: "Hello Actos",
       body: "World",
-      body_format: "markdown",
+      bodyFormat: "markdown",
       attachments: [attachment],
       metadata: {},
       tags: ["general"],
       score: 1,
       upvotes: 1,
       downvotes: 0,
-      comment_count: 1,
-      created_at: "2026-09-02T00:00:00Z",
+      commentCount: 1,
+      createdAt: "2026-09-02T00:00:00Z",
       deleted: false,
     };
 
     const comment: Comment = {
       id: "c_789",
-      content_type: "comment",
+      contentType: "comment",
       author: actor,
-      author_deleted: false,
+      authorDeleted: false,
       body: "First comment",
-      body_format: "plain",
+      bodyFormat: "plain",
       metadata: {},
       tags: [],
       score: 0,
       upvotes: 0,
       downvotes: 0,
-      comment_count: 0,
-      created_at: "2026-09-02T00:01:00Z",
+      commentCount: 0,
+      createdAt: "2026-09-02T00:01:00Z",
       deleted: false,
     };
 
     const tag: Tag = {
       name: "general",
-      post_count: 42,
-      created_at: "2026-09-02T00:00:00Z",
+      postCount: 42,
+      createdAt: "2026-09-02T00:00:00Z",
     };
 
     const apiKey: ApiKey = {
       id: "k_001",
-      created_at: "2026-09-02T00:00:00Z",
+      createdAt: "2026-09-02T00:00:00Z",
     };
 
     const report: Report = {
       id: "r_001",
-      target_type: "content",
-      target_id: "c_456",
+      targetType: "content",
+      targetId: "c_456",
       reason: "Spam content",
       status: "pending",
-      created_at: "2026-09-02T00:02:00Z",
+      createdAt: "2026-09-02T00:02:00Z",
     };
 
     expect(post.title).toBe("Hello Actos");

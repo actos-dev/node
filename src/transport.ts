@@ -139,7 +139,7 @@ export class Transport {
 
     this.timeout = options.timeout ?? 30_000;
     this.maxRetries = options.maxRetries ?? 2;
-    this.fetchFn = options.fetch ?? globalThis.fetch.bind(globalThis);
+    this.fetchFn = options.fetch ?? ((...args) => globalThis.fetch(...args));
     this.userAgent = options.userAgent ?? `actos-node/${VERSION}`;
   }
 
