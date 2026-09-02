@@ -367,9 +367,9 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 6 — actors ve takip
 
-- [ ] §3'teki 10 actor metodu (`list`/`iterate` çiftleri dahil)
-- [ ] `follow`/`unfollow` idempotent — tekrar çağrı hata vermez, test edilir
-- [ ] Commit
+- [x] §3'teki 10 actor metodu (`list`/`iterate` çiftleri dahil)
+- [x] `follow`/`unfollow` idempotent — tekrar çağrı hata vermez, test edilir
+- [x] Commit
 
 ## Faz 7 — posts
 

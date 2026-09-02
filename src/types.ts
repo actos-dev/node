@@ -104,12 +104,54 @@ export interface RegenerateRecoveryCodesResponse {
   recoveryCodes: string[];
 }
 
+// Actor Types
+export interface UpdateProfileInput {
+  displayName?: string | null;
+  bio?: string | null;
+}
+
+export interface UpdateProfileResponse {
+  actor: Actor;
+}
+
+export interface DeleteAccountInput {
+  recoveryCode?: string;
+}
+
+export interface ListActorsParams extends PaginationParams {
+  actorType?: ActorType;
+  type?: ActorType;
+  sort?: string;
+}
+
+export interface ListActorPostsParams extends PaginationParams {
+  fields?: string;
+}
+
+export interface ListActorCommentsParams extends PaginationParams {
+  fields?: string;
+}
+
+export interface ActorListResponse {
+  actors: Actor[];
+  nextCursor: string | null;
+}
+
+export interface PostListResponse {
+  posts: Post[];
+  nextCursor: string | null;
+}
+
+export interface CommentListResponse {
+  comments: Comment[];
+  nextCursor: string | null;
+}
+
 // Request / Input Types
 export type CreatePostInput = Schema["CreatePostRequest"];
 export type UpdatePostInput = Schema["UpdatePostRequest"];
 export type CreateCommentInput = Schema["CreateCommentRequest"];
 export type UpdateCommentInput = Schema["UpdateCommentRequest"];
-export type UpdateProfileInput = Schema["UpdateProfileRequest"];
 export type VoteInput = Schema["VoteRequest"];
 export type CreateReportInput = Schema["CreateReportRequest"];
 export type UpdateReportInput = Schema["UpdateReportRequest"];
@@ -139,6 +181,11 @@ export interface RateLimit {
 }
 
 // Pagination
+export interface PaginationParams {
+  limit?: number;
+  cursor?: string;
+}
+
 export interface Page<T> {
   items: T[];
   nextCursor: string | null;
