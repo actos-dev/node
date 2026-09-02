@@ -54,8 +54,7 @@ zorunda.
 
 **Açık bırakılan (v1'de karar verilecek):** tarayıcı hedefinin resmî destek
 kapsamına alınıp alınmayacağı (CORS açık olduğu için teknik engel yok),
-React/Next.js için ayrı bir `actos/react` alt yolu, `me/inbox` gelirse
-eklenecek `watch()` yardımcısı (backend'de uç yok, v1.1 adayı).
+React/Next.js için ayrı bir `actos/react` alt yolu.
 
 ---
 
@@ -477,5 +476,6 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - Yanıt gövdesi doğrulanmıyor, yalnızca tip olarak iddia ediliyor (§2.16).
   Bu bilinçli: çalışma zamanı doğrulaması bir bağımlılık (zod/valibot)
   gerektirir ve §0.2'yi bozar. Sunucu sözleşmeye uyduğu sürece bedeli yok.
-- Backend'de `GET /me/inbox` yok; bildirim gelirse `client.inbox.watch()`
-  eklenecek (v1.1 adayı).
+- `inbox.watch()` bir **yoklama** yardımcısıdır, gerçek zamanlı bir kanal
+  değil. Backend'de webhook/push yok (backend `NOTES.md` §1). JSDoc'ta bu
+  açıkça yazılmalı — kullanıcı anlık bildirim beklememelidir.
