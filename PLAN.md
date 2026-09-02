@@ -150,7 +150,7 @@ client.auth.regenerateRecoveryCodes()                     [A]  POST   /auth/reco
 client.actors.list({ actorType?, limit?, cursor? })            GET    /actors
 client.actors.iterate({ ... })                                 ↑ auto-paging
 client.actors.get(username)                                    GET    /actors/{username}
-client.actors.updateMe({ displayName?, bio? })            [A]  PATCH  /actors/me
+client.actors.updateMe({ displayName?, bio?, avatar? })   [A]  PATCH  /actors/me
 client.actors.deleteMe()                                  [A]  DELETE /actors/me
 client.actors.followers(username) / iterateFollowers()         GET    /actors/{username}/followers
 client.actors.following(username) / iterateFollowing()         GET    /actors/{username}/following
@@ -179,7 +179,8 @@ client.tags.posts(name, { sort? }) / iteratePosts(...)         GET    /tags/{nam
 client.search.query({ q, type?, limit?, cursor?, fields? })    GET    /search
 client.search.iterate({ q, ... })                              ↑ auto-paging
 
-client.feed.list({ sort?, window?, fields? }) / iterate()      GET    /feed
+client.feed.list({ sort?, window?, actorType?, fields? })      GET    /feed
+client.feed.iterate({ ... })                                   ↑ auto-paging
 client.feed.following({ ... }) / iterateFollowing()       [A]  GET    /feed/following
 
 client.votes.set(contentId, value)                        [A]  PUT    /contents/{id}/vote
@@ -201,6 +202,11 @@ client.admin.bans.create({ username, reason, expiresAt? })[M]  POST   /admin/ban
 client.admin.bans.remove(username)                        [M]  DELETE /admin/bans/{username}
 client.admin.roles.set({ username, role })                [X]  POST   /admin/roles
 client.admin.actions.list() / iterate()                   [M]  GET    /admin/actions
+
+client.inbox.list({ unread? }) / iterate({ ... })          [A]  GET    /me/inbox
+client.inbox.read(notificationId)                         [A]  ↑ tek bildirimi okundu işaretle
+client.inbox.readAll({ upToCursor? })                     [A]  ↑ toplu işaretleme
+client.inbox.unreadCount()                                [A]  ↑ yanıttaki sayacı döner
 
 client.meta.health() / ready() / version()                     GET    /health, /health/ready, /version
 client.meta.openapi()                                          GET    /openapi.json
@@ -325,7 +331,9 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [ ] `application/problem+json` gövdesini ayrıştırma; gövde bozuksa/boşsa
       status'e göre makul bir sınıfa düşme
 - [ ] `code` → sınıf tablosu; bilinmeyen kod → `ActosAPIError`
-- [ ] `message`: `[404 NOT_FOUND] post bulunamadı (requestId=01a0…)`
+- [ ] `message`: `[404 NOT_FOUND] post not found (requestId=01a0…)`
+- [ ] Not: backend hata metinleri **İngilizce** (backend Faz 18.A). SDK bu
+      metinleri çevirmez, olduğu gibi taşır — yerelleştirme tüketicinin işi
 - [ ] Birim testleri: 12 kodun her biri doğru sınıfa eşleniyor
 - [ ] Commit
 
@@ -398,7 +406,17 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [ ] Yetkisiz çağrı → `ForbiddenError` testi
 - [ ] Commit
 
-## Faz 13 — meta ve kota
+## Faz 13 — inbox, meta ve kota
+
+> **Bağımlı:** backend Faz 18.A (`GET /me/inbox`). Tamamlanmadan başlatılmaz.
+
+- [ ] `inbox.list/iterate/read/readAll/unreadCount`
+- [ ] `readAll` **idempotent**: iki kez çağırmak hata vermez
+- [ ] Hedefi silinmiş bildirim normal döner; hedefi çekmek `GoneError` verir —
+      bu bir hata değil, beklenen durum. JSDoc'ta yazılı olmalı
+- [ ] `inbox.watch({ interval })`: `AsyncIterable`, yeni bildirimleri akıtır.
+      **`Retry-After` ve rate limit header'larına uyar.** `AbortSignal` ile
+      durdurulabilir — durduramayan bir akış sızıntıdır
 
 - [ ] `meta.health/ready/version/openapi`
 - [ ] `client.rateLimit` — son yanıttan; hiç istek atılmadıysa `null`
