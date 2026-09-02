@@ -400,13 +400,13 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 11 — uploads
 
-- [ ] `uploads.create(file)` — `Blob`/`File`, `Uint8Array`, dosya yolu (Node)
-- [ ] `FormData` yerleşiği kullanılır, `Content-Type` **elle set edilmez**
+- [x] `uploads.create(file)` — `Blob`/`File`, `Uint8Array`, dosya yolu (Node)
+- [x] `FormData` yerleşiği kullanılır, `Content-Type` **elle set edilmez**
       (boundary'yi runtime koyar)
-- [ ] Dosya yolu girdisi yalnızca Node'da; tarayıcıda anlamlı hata
-- [ ] `uploads.delete(id)`
-- [ ] Yükleyip `posts.create({ attachments: [id] })` ile bağlama örneği
-- [ ] Commit
+- [x] Dosya yolu girdisi yalnızca Node'da; tarayıcıda anlamlı hata
+- [x] `uploads.delete(id)`
+- [x] Yükleyip `posts.create({ attachments: [id] })` ile bağlama örneği
+- [x] Commit
 
 ## Faz 12 — reports ve admin
 

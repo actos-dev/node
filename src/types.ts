@@ -303,3 +303,11 @@ export interface SaveListResponse {
   saves: Post[];
   nextCursor?: string | null;
 }
+
+// Upload Types
+export type UploadFileInput = Blob | Uint8Array | string;
+
+export interface UploadOptions {
+  filename?: string;
+  contentType?: string;
+}
