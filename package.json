@@ -26,7 +26,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "test": "vitest run",
+    "test": "vitest run test/unit",
+    "test:unit": "vitest run test/unit",
+    "test:contract": "vitest run test/contract",
+    "test:all": "vitest run",
     "test:watch": "vitest",
     "generate:types": "tsx scripts/generate-types.ts",
     "generate:types:check": "tsx scripts/generate-types.ts --check"

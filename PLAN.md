@@ -429,19 +429,19 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [ ] `verifications.create/check/list/delete` (alan adı doğrulaması)
 - [ ] Yükleme kotası aşımı (backend Faz 18.A) anlamlı hataya eşlenir
 
-- [ ] `meta.health/ready/version/openapi`
-- [ ] `client.rateLimit` — son yanıttan; hiç istek atılmadıysa `null`
-- [ ] `version()` SDK sürümü + sunucu sürümünü birlikte verir
+- [x] `meta.health/ready/version/openapi`
+- [x] `client.rateLimit` — son yanıttan; hiç istek atılmadıysa `null`
+- [x] `version()` SDK sürümü + sunucu sürümünü birlikte verir
 - [ ] Commit
 
 ## Faz 14 — Sözleşme test paketi
 
-- [ ] `test/contract/`: §2'nin **16 maddesinin her biri** için en az bir test
-- [ ] Canlı backend'e karşı çalışır (`ACTOS_BASE_URL` + `docker compose up`),
+- [x] `test/contract/`: §2'nin **16 maddesinin her biri** için en az bir test
+- [x] Canlı backend'e karşı çalışır (`ACTOS_BASE_URL` + `docker compose up`),
       ayrı vitest projesi olarak tetiklenir, varsayılan koşuda atlanır
-- [ ] Uçtan uca senaryo: kayıt → post → yorum → oy → arama → rapor → temizlik
-- [ ] Node 20 ve Node 22'de ayrı koşulur
-- [ ] Commit
+- [x] Uçtan uca senaryo: kayıt → post → yorum → oy → arama → rapor → temizlik
+- [x] Node 20 ve Node 22'de ayrı koşulur
+- [x] Commit
 
 ## Faz 15 — Dokümantasyon
 
