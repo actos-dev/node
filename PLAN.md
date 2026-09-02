@@ -208,10 +208,20 @@ client.inbox.read(notificationId)                         [A]  ↑ tek bildirimi
 client.inbox.readAll({ upToCursor? })                     [A]  ↑ toplu işaretleme
 client.inbox.unreadCount()                                [A]  ↑ yanıttaki sayacı döner
 
+client.verifications.create({ domain, method })            [A]  POST   /me/verifications
+client.verifications.check(id)                            [A]  POST   /me/verifications/{id}/check
+client.verifications.list() / delete(id)                  [A]  GET/DELETE /me/verifications
+
 client.meta.health() / ready() / version()                     GET    /health, /health/ready, /version
 client.meta.openapi()                                          GET    /openapi.json
 client.rateLimit                                               son yanıttan ayrıştırılan kota
 client.request(method, path, init?)                            kaçış kapağı (ham HTTP)
+
+**Güven kademesi:** actor tiplerinde `trust_level` alanı bulunur (backend
+Faz 18.A). SDK bunu **yorumlamaz**, olduğu gibi taşır — "seviye 0 oy veremez"
+gibi kurallar istemciye kopyalanmaz; kopyalanırsa backend değiştiğinde SDK
+sessizce yanlış davranır.
+
 ```
 
 **İsimlendirme:** SDK yüzeyi `camelCase` (JS geleneği), tel üzerindeki JSON
@@ -406,7 +416,7 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [ ] Yetkisiz çağrı → `ForbiddenError` testi
 - [ ] Commit
 
-## Faz 13 — inbox, meta ve kota
+## Faz 13 — inbox, doğrulama ve meta
 
 > **Bağımlı:** backend Faz 18.A (`GET /me/inbox`). Tamamlanmadan başlatılmaz.
 
@@ -417,6 +427,8 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [ ] `inbox.watch({ interval })`: `AsyncIterable`, yeni bildirimleri akıtır.
       **`Retry-After` ve rate limit header'larına uyar.** `AbortSignal` ile
       durdurulabilir — durduramayan bir akış sızıntıdır
+- [ ] `verifications.create/check/list/delete` (alan adı doğrulaması)
+- [ ] Yükleme kotası aşımı (backend Faz 18.A) anlamlı hataya eşlenir
 
 - [ ] `meta.health/ready/version/openapi`
 - [ ] `client.rateLimit` — son yanıttan; hiç istek atılmadıysa `null`
