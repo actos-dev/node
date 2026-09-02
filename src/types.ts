@@ -279,3 +279,27 @@ export interface FeedFollowingParams<F extends keyof Post = keyof Post> extends 
   window?: FeedWindow;
   fields?: F[];
 }
+
+// Vote Types
+export type VoteValue = 1 | -1 | 0;
+
+export interface VoteResponse {
+  value: number;
+  score: number;
+  upvotes: number;
+  downvotes: number;
+}
+
+export interface VoteMapResponse {
+  votes: Record<string, number>;
+}
+
+// Save Types
+export interface ListSavesParams<F extends keyof Post = keyof Post> extends PaginationParams {
+  fields?: F[];
+}
+
+export interface SaveListResponse {
+  saves: Post[];
+  nextCursor?: string | null;
+}
