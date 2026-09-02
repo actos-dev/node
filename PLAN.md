@@ -298,14 +298,14 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 0 — Repo iskeleti
 
-- [ ] `package.json`: `"type": "module"`, dual export map (ESM+CJS+types),
+- [x] `package.json`: `"type": "module"`, dual export map (ESM+CJS+types),
       `engines.node >= 20`, **`dependencies: {}`**
-- [ ] `tsconfig.json` (`strict`, `moduleResolution: "bundler"`, `target: ES2022`)
-- [ ] `tsup.config.ts` → `dist/` (esm, cjs, dts, sourcemap)
-- [ ] `biome.json` (lint + format)
-- [ ] `LICENSE` (Apache-2.0), `README.md` iskeleti, `.gitignore`, `.npmrc`
-- [ ] `.github/workflows/ci.yml`: biome + tsc + vitest. **Yayın job'u yok**
-- [ ] Commit
+- [x] `tsconfig.json` (`strict`, `moduleResolution: "bundler"`, `target: ES2022`)
+- [x] `tsup.config.ts` → `dist/` (esm, cjs, dts, sourcemap)
+- [x] `biome.json` (lint + format)
+- [x] `LICENSE` (Apache-2.0), `README.md` iskeleti, `.gitignore`, `.npmrc`
+- [x] `.github/workflows/ci.yml`: biome + tsc + vitest. **Yayın job'u yok**
+- [x] Commit
 
 ## Faz 1 — Tip üretim hattı
 
