@@ -320,19 +320,19 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 2 — Taşıma katmanı
 
-- [ ] `transport.ts`: `fetch` sarmalayıcısı
-- [ ] `Authorization: Bearer`, `User-Agent`, `Content-Type` header'ları
-- [ ] Zaman aşımı `AbortController` ile (varsayılan 30 sn); kullanıcının
+- [x] `transport.ts`: `fetch` sarmalayıcısı
+- [x] `Authorization: Bearer`, `User-Agent`, `Content-Type` header'ları
+- [x] Zaman aşımı `AbortController` ile (varsayılan 30 sn); kullanıcının
       `signal`'ı ile birleştirme (`AbortSignal.any`)
-- [ ] Yeniden deneme: §2.6 kuralı, exponential + full jitter,
+- [x] Yeniden deneme: §2.6 kuralı, exponential + full jitter,
       `Retry-After` önceliği, `maxRetries` (varsayılan 2)
-- [ ] `X-RateLimit-*` ayrıştırma → `RateLimit` nesnesi
-- [ ] `camelCase` ↔ `snake_case` dönüşümü — tek yerde, derin, dizi-farkında.
+- [x] `X-RateLimit-*` ayrıştırma → `RateLimit` nesnesi
+- [x] `camelCase` ↔ `snake_case` dönüşümü — tek yerde, derin, dizi-farkında.
       **Alan adları veri değil anahtar**: `metadata` içeriği dönüştürülmez
       (kullanıcının serbest jsonb alanı), bu istisna test edilir
-- [ ] Birim testleri (msw): retry sayısı, 4xx'te denememe,
+- [x] Birim testleri (msw): retry sayısı, 4xx'te denememe,
       idempotency'siz POST'ta 5xx denememe, `Retry-After`'a uyma, abort
-- [ ] Commit
+- [x] Commit
 
 ## Faz 3 — Hata hiyerarşisi
 
