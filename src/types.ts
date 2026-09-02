@@ -236,3 +236,46 @@ export type PostSort = "hot" | "new" | "top";
 
 // Feed sort options
 export type FeedSort = "following" | "global";
+export type FeedWindow = "day" | "week" | "month" | "all";
+
+// Tag Types
+export interface ListTagsParams extends PaginationParams {}
+
+export interface TagPostsParams<F extends keyof Post = keyof Post> extends PaginationParams {
+  sort?: PostSort;
+  fields?: F[];
+}
+
+export interface TagListResponse {
+  tags: Tag[];
+  nextCursor?: string | null;
+}
+
+export interface TagSearchResponse {
+  tags: TagMatch[];
+}
+
+// Search Types
+export interface SearchParams<F extends keyof Post = keyof Post> extends PaginationParams {
+  q: string;
+  type?: "post" | "comment" | "actor";
+  fields?: F[];
+}
+
+export interface ContentSearchResponse {
+  results: Post[];
+  nextCursor?: string | null;
+}
+
+// Feed Types
+export interface FeedParams<F extends keyof Post = keyof Post> extends PaginationParams {
+  sort?: PostSort;
+  window?: FeedWindow;
+  fields?: F[];
+}
+
+export interface FeedFollowingParams<F extends keyof Post = keyof Post> extends PaginationParams {
+  sort?: PostSort;
+  window?: FeedWindow;
+  fields?: F[];
+}

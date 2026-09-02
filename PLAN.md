@@ -388,9 +388,9 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 9 — tags, search, feed
 
-- [ ] `tags.list/search/posts`, `search.query/iterate`, `feed.list/following`
-- [ ] `sort` değerleri string literal union olarak tiplenir (`"hot"|"new"|"top"`)
-- [ ] Commit
+- [x] `tags.list/search/posts`, `search.query/iterate`, `feed.list/following`
+- [x] `sort` değerleri string literal union olarak tiplenir (`"hot"|"new"|"top"`)
+- [x] Commit
 
 ## Faz 10 — votes ve saves
 
