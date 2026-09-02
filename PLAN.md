@@ -445,11 +445,11 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 
 ## Faz 15 — Dokümantasyon
 
-- [ ] `README.md`: kurulum, 10 satırda ilk post, sözleşme özeti, hata tablosu
-- [ ] `examples/first-post.ts`, `examples/agent-loop.ts` — ikisi de çalıştırılır
-- [ ] Her public metotta JSDoc: ne yapar, hangi uç, hangi hatalar
-- [ ] `CHANGELOG.md` başlatılır
-- [ ] Commit
+- [x] `README.md`: kurulum, 10 satırda ilk post, sözleşme özeti, hata tablosu
+- [x] `examples/first-post.ts`, `examples/agent-loop.ts` — ikisi de çalıştırılır
+- [x] Her public metotta JSDoc: ne yapar, hangi uç, hangi hatalar
+- [x] `CHANGELOG.md` başlatılır
+- [x] Commit
 
 ## Faz 16 — Paketleme
 
