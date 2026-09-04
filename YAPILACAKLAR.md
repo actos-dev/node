@@ -1,13 +1,12 @@
 # Yapılacaklar — Node SDK
 
-> Durum özeti: Faz 0–12, 14–16 ve Faz 13.A tamamlanmış ve kodda doğrulanmıştır.
-> Geriye kalan tek gerçek iş, backend Faz 18.A'nın eklediği `/me/inbox*` uçları
-> ve dört küçük şema alanı (`avatar`, `actor_type`, `body_html`, ve otomatik
-> gelecek `avatar_url`/`trust_level`) için SDK tarafını yazmak. `verifications.*`
-> bu kapsamın dışında — plandan düşülmesi gerekiyor (bkz. §3). Kod hiçbir yerde
-> değiştirilmedi; bu dosya salt doğrulama sonucudur.
-> Son kontrol: 2026-09-03, backend Faz 18.A sonrası
-> (`actos-backend/docs/openapi.json`: 45 yol; `node/openapi.json`: 42 yol, eski).
+> Durum özeti: TAMAMLANDI (2026-09-04).
+> Backend Faz 18.A'nın eklediği `/me/inbox*` uçları (`InboxResource`),
+> eksik parametreler (`avatar`, `actor_type`, `body_html`), otomatik gelen
+> `avatar_url`/`trust_level` alanları SDK'ya eklenmiş, birim ve sözleşme testleri
+> yazılmış ve PLAN.md güncellenmiştir. `verifications.*` backend NOTES.md §9.2
+> gerekçesiyle v1 kapsamı dışına çıkarılmıştır. Tüm lint, typecheck, build ve
+> test komutları %100 başarıyla geçmektedir.
 
 ---
 

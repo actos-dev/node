@@ -52,22 +52,19 @@ Bu paketin en güçlü satış argümanı bu olabilir: Node 20+ `fetch`, `FormDa
 Bir bağımlılık eklemek isteyen adım, önce bu maddeyi gerekçeyle çürütmek
 zorunda.
 
-### 0.3. Bugün kodlanamayacaklar — backend Faz 18.A bekliyor
+### 0.3. Backend Faz 18.A durumu ve v1 kapsamı
 
-Backend `PLAN.md` Faz 18.A henüz uygulanmadı. **Canlı `GET /openapi.json`
-otoritedir:** bu planın §3'ünde listelenip spec'te bulunmayan hiçbir uç ya da
-alan için kod yazılmaz, uydurulmaz.
+Backend Faz 18.A tamamlanmış ve `node/openapi.json` güncellenmiştir.
+Bu kapsamda:
+- `inbox.*` kaynağı tamamlandı (bkz. Faz 13.B).
+- `actors.updateMe`'in `avatar` parametresi eklendi (Faz 6).
+- `feed.list` ve `feed.following` için `actorType` parametresi eklendi (Faz 9).
+- `comments.list` için `bodyHtml` parametresi eklendi (Faz 8).
 
-Bugün atlanacaklar, planda `[ ]` bırakılır:
-
-| Ne | Nerede |
-|---|---|
-| `inbox.*` ve `verifications.*` | Faz 13.B |
-| `actors.updateMe`'in `avatar` parametresi | Faz 6 |
-| `feed.list`'in `actorType` parametresi | Faz 9 |
-
-Backend Faz 18.A bitince tipler yeniden üretilir ve bu parçalar ikinci bir
-geçişte eklenir.
+**Kapsam dışı bırakılan:**
+- `verifications.*` (alan adı doğrulaması) backend `NOTES.md` §9.2 gerekçesiyle
+  (SSRF ve DNS rebinding TOCTOU güvenlik riskleri; backend'in dış ağa çıkmaması kararı)
+  v1 kapsamı dışına çıkarılmıştır. Canlı spec'te bulunmamaktadır.
 
 **Spec nerede:** `actos-backend/docs/openapi.json` — repoda commit'li, sunucu
 ayağa kaldırmana gerek yok. Canlı doğrulama yapacaksan backend'de
@@ -227,10 +224,9 @@ client.inbox.list({ unread? }) / iterate({ ... })          [A]  GET    /me/inbox
 client.inbox.read(notificationId)                         [A]  ↑ tek bildirimi okundu işaretle
 client.inbox.readAll({ upToCursor? })                     [A]  ↑ toplu işaretleme
 client.inbox.unreadCount()                                [A]  ↑ yanıttaki sayacı döner
+client.inbox.watch({ interval?, signal? })                [A]  ↑ yoklama akışı (AsyncIterable)
 
-client.verifications.create({ domain, method })            [A]  POST   /me/verifications
-client.verifications.check(id)                            [A]  POST   /me/verifications/{id}/check
-client.verifications.list() / delete(id)                  [A]  GET/DELETE /me/verifications
+# Not: verifications.* v1 kapsamı dışına çıkarılmıştır (backend NOTES.md §9.2 gerekçesiyle).
 
 client.meta.health() / ready() / version()                     GET    /health, /health/ready, /version
 client.meta.openapi()                                          GET    /openapi.json
@@ -445,21 +441,22 @@ derin iç içe biçimindedir (`components["schemas"]["Post"]`); kullanıcıya
 - [x] `version()` SDK sürümü + sunucu sürümünü birlikte verir
 - [x] Commit (13.A) — Faz 14 commit'ine (a381a71) dahil edildi
 
-### 13.B — inbox ve doğrulama (BLOKE — backend Faz 18.A)
+### 13.B — inbox ve bildirimler
 
-> Bu bölüm backend Faz 18.A tamamlanmadan **başlatılmaz.** Uçlar canlı
-> spec'te yokken kod yazılmaz; bkz. §0.3.
-
-- [ ] `inbox.list/iterate/read/readAll/unreadCount`
-- [ ] `readAll` **idempotent**: iki kez çağırmak hata vermez
-- [ ] Hedefi silinmiş bildirim normal döner; hedefi çekmek `GoneError` verir —
+- [x] `inbox.list/iterate/read/readAll/unreadCount`
+- [x] `readAll` **idempotent**: iki kez çağırmak hata vermez
+- [x] Hedefi silinmiş bildirim normal döner; hedefi çekmek `GoneError` verir —
       bu bir hata değil, beklenen durum. JSDoc'ta yazılı olmalı
-- [ ] `inbox.watch({ interval })`: `AsyncIterable`, yeni bildirimleri akıtır.
+- [x] `inbox.watch({ interval })`: `AsyncIterable`, yeni bildirimleri akıtır.
       **`Retry-After` ve rate limit header'larına uyar.** `AbortSignal` ile
       durdurulabilir — durduramayan bir akış sızıntıdır
-- [ ] `verifications.create/check/list/delete` (alan adı doğrulaması)
-- [ ] Yükleme kotası aşımı (backend Faz 18.A) anlamlı hataya eşlenir
-- [ ] Commit (13.B)
+- [x] Yükleme kotası aşımı (backend Faz 18.A) anlamlı hataya eşlenir (`UnsupportedMediaError` / 415, `RateLimitError` / 429)
+- [x] Commit (13.B)
+
+> Not: `verifications.create/check/list/delete` (alan adı doğrulaması) v1 kapsamı
+> dışına çıkarılmıştır. Backend `NOTES.md` §9.2 gerekçesiyle (SSRF ve DNS rebinding
+> TOCTOU riskleri; backend'in dış ağ erişimi yapmama kararı) ertelenmiştir;
+> backend spec'inde yer almamaktadır.
 
 ## Faz 14 — Sözleşme test paketi
 
