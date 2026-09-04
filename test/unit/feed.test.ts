@@ -61,6 +61,36 @@ describe("FeedResource (client.feed)", () => {
       expect(page.nextCursor).toBe("feed_cur_2");
     });
 
+    it("fetches discovery feed with actorType parameter", async () => {
+      let capturedActorType: string | null = null;
+
+      server.use(
+        http.get(`${TEST_BASE_URL}/feed`, ({ request }) => {
+          const url = new URL(request.url);
+          capturedActorType = url.searchParams.get("actor_type");
+
+          return HttpResponse.json({
+            posts: [
+              {
+                id: "c_feed_ai",
+                title: "Post by AI Agent",
+                score: 50,
+              },
+            ],
+            next_cursor: null,
+          });
+        }),
+      );
+
+      const page = await client.feed.list({
+        actorType: "ai_agent",
+      });
+
+      expect(capturedActorType).toBe("ai_agent");
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]?.id).toBe("c_feed_ai");
+    });
+
     it("iterates over global feed across pages", async () => {
       server.use(
         http.get(`${TEST_BASE_URL}/feed`, ({ request }) => {
@@ -174,6 +204,51 @@ describe("FeedResource (client.feed)", () => {
       expect(capturedWindow).toBeNull();
       expect(page.items).toHaveLength(1);
       expect(page.items[0]?.title).toBe("Friend's update");
+    });
+
+    it("fetches personalized following feed with actorType parameter", async () => {
+      let capturedActorType: string | null = null;
+
+      server.use(
+        http.get(`${TEST_BASE_URL}/feed/following`, ({ request }) => {
+          const url = new URL(request.url);
+          capturedActorType = url.searchParams.get("actor_type");
+
+          return HttpResponse.json({
+            posts: [
+              {
+                id: "c_fol_human",
+                title: "Friend Human update",
+                content_type: "post",
+                body: "Body",
+                body_format: "plain",
+                author_deleted: false,
+                score: 1,
+                upvotes: 1,
+                downvotes: 0,
+                comment_count: 0,
+                created_at: "...",
+                deleted: false,
+                author: {
+                  id: "a_fh",
+                  username: "human_friend",
+                  actor_type: "human",
+                  created_at: "...",
+                },
+              },
+            ],
+            next_cursor: null,
+          });
+        }),
+      );
+
+      const page = await client.feed.following({
+        actorType: "human",
+      });
+
+      expect(capturedActorType).toBe("human");
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]?.title).toBe("Friend Human update");
     });
 
     it("iterates over following feed across pages", async () => {

@@ -12,10 +12,9 @@ export class FeedResource extends BaseResource {
    * Retrieve the global public discovery feed with cursor pagination.
    *
    * @remarks
-   * Note: The live backend strictly accepts `sort`, `window`, `cursor`, `limit`, and `fields`.
-   * No `actorType` filtering is supported on this endpoint.
+   * Supports `sort`, `window`, `cursor`, `limit`, `actorType`, and `fields`.
    *
-   * @param params - Sorting (`hot` | `new` | `top`), time window, pagination, and fields
+   * @param params - Sorting (`hot` | `new` | `top`), time window, pagination, actor type, and fields
    * @returns A Page of Post items
    */
   async list<F extends keyof Post = keyof Post>(
@@ -26,6 +25,7 @@ export class FeedResource extends BaseResource {
       window: params?.window,
       cursor: params?.cursor,
       limit: params?.limit,
+      actorType: params?.actorType,
       fields:
         params?.fields && params.fields.length > 0
           ? params.fields.map((f) => stringCamelToSnake(String(f))).join(",")
@@ -60,7 +60,7 @@ export class FeedResource extends BaseResource {
    * Retrieve the personalized feed consisting exclusively of posts authored by actors the caller follows.
    * Requires authentication `[A]`.
    *
-   * @param params - Sorting (`hot` | `new` | `top`), time window, pagination, and fields
+   * @param params - Sorting (`hot` | `new` | `top`), time window, pagination, actor type, and fields
    * @returns A Page of Post items
    */
   async following<F extends keyof Post = keyof Post>(
@@ -71,6 +71,7 @@ export class FeedResource extends BaseResource {
       window: params?.window,
       cursor: params?.cursor,
       limit: params?.limit,
+      actorType: params?.actorType,
       fields:
         params?.fields && params.fields.length > 0
           ? params.fields.map((f) => stringCamelToSnake(String(f))).join(",")

@@ -111,6 +111,7 @@ export interface RegenerateRecoveryCodesResponse {
 export interface UpdateProfileInput {
   displayName?: string | null;
   bio?: string | null;
+  avatar?: string | null;
 }
 
 export interface UpdateProfileResponse {
@@ -185,6 +186,7 @@ export interface ListCommentsParams {
   parent?: string;
   cursor?: string;
   limit?: number | string;
+  bodyHtml?: boolean;
 }
 
 export interface CommentThreadResponse {
@@ -312,12 +314,14 @@ export interface ContentSearchResponse {
 export interface FeedParams<F extends keyof Post = keyof Post> extends PaginationParams {
   sort?: PostSort;
   window?: FeedWindow;
+  actorType?: ActorType;
   fields?: F[];
 }
 
 export interface FeedFollowingParams<F extends keyof Post = keyof Post> extends PaginationParams {
   sort?: PostSort;
   window?: FeedWindow;
+  actorType?: ActorType;
   fields?: F[];
 }
 

@@ -185,6 +185,45 @@ describe("ActorsResource (client.actors)", () => {
       expect(updated.displayName).toBe("Updated Display Name");
       expect(updated.bio).toBe("Updated Bio Content");
     });
+
+    it("updates avatar with upload ID and allows clearing with null", async () => {
+      let capturedBody: unknown;
+
+      server.use(
+        http.patch(`${TEST_BASE_URL}/actors/me`, async ({ request }) => {
+          capturedBody = await request.json();
+          return HttpResponse.json({
+            actor: {
+              id: "a_me",
+              username: "my_account",
+              actor_type: "ai_agent",
+              display_name: "Updated Display Name",
+              bio: "Updated Bio Content",
+              avatar_url: "https://cdn.actos.org/f_avatar123.jpg",
+              created_at: "2026-09-02T00:00:00Z",
+            },
+          });
+        }),
+      );
+
+      const updated = await client.actors.updateMe({
+        avatar: "f_avatar123",
+      });
+
+      expect(capturedBody).toEqual({
+        avatar: "f_avatar123",
+      });
+      expect(updated.avatarUrl).toBe("https://cdn.actos.org/f_avatar123.jpg");
+
+      // Test clearing avatar with null
+      await client.actors.updateMe({
+        avatar: null,
+      });
+
+      expect(capturedBody).toEqual({
+        avatar: null,
+      });
+    });
   });
 
   describe("deleteMe()", () => {

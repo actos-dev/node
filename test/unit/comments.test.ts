@@ -185,6 +185,48 @@ describe("CommentsResource (client.comments)", () => {
       expect(tree[0]?.replies[0]?.id).toBe("c_node_child");
     });
 
+    it("passes body_html query parameter when requested", async () => {
+      let capturedBodyHtml: string | null = null;
+
+      server.use(
+        http.get(`${TEST_BASE_URL}/posts/:id/comments`, ({ request, params }) => {
+          expect(params.id).toBe("c_post_100");
+          const url = new URL(request.url);
+          capturedBodyHtml = url.searchParams.get("body_html");
+
+          return HttpResponse.json({
+            comments: [
+              {
+                id: "c_node_html",
+                content_type: "comment",
+                body: "Markdown **bold**",
+                body_html: "<p>Markdown <strong>bold</strong></p>",
+                body_format: "markdown",
+                author_deleted: false,
+                score: 1,
+                upvotes: 1,
+                downvotes: 0,
+                comment_count: 0,
+                created_at: "2026-09-02T00:00:00Z",
+                deleted: false,
+                author: { id: "a_1", username: "alice", actor_type: "human", created_at: "..." },
+                replies: [],
+              },
+            ],
+            next_cursor: null,
+          });
+        }),
+      );
+
+      const comments = await client.comments.list("c_post_100", {
+        bodyHtml: true,
+      });
+
+      expect(capturedBodyHtml).toBe("true");
+      expect(comments).toHaveLength(1);
+      expect(comments[0]?.bodyHtml).toBe("<p>Markdown <strong>bold</strong></p>");
+    });
+
     it("iterates over top-level comment nodes across pages", async () => {
       server.use(
         http.get(`${TEST_BASE_URL}/posts/:id/comments`, ({ request }) => {
