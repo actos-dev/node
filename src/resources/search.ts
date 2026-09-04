@@ -70,10 +70,7 @@ export class SearchResource extends BaseResource {
   /**
    * Search actors with query text.
    */
-  async actors(
-    q: string,
-    params?: Omit<SearchParams, "q" | "type">,
-  ): Promise<Page<ActorSummary>> {
+  async actors(q: string, params?: Omit<SearchParams, "q" | "type">): Promise<Page<ActorSummary>> {
     const query: Record<string, unknown> = {
       q,
       type: "actor",
