@@ -1,5 +1,12 @@
 import { type AsyncPaginator, createAsyncIterable } from "../pagination.js";
-import type { ContentSearchResponse, Page, Post, SearchParams } from "../types.js";
+import type {
+  ActorSearchResponse,
+  ActorSummary,
+  ContentSearchResponse,
+  Page,
+  Post,
+  SearchParams,
+} from "../types.js";
 import { stringCamelToSnake } from "../utils/case.js";
 import { BaseResource } from "./base.js";
 
@@ -36,6 +43,52 @@ export class SearchResource extends BaseResource {
 
     return {
       items: res.data.results as unknown as Pick<Post, F>[],
+      nextCursor: res.data.nextCursor ?? null,
+    };
+  }
+
+  /**
+   * Search posts with query text.
+   */
+  async posts<F extends keyof Post = keyof Post>(
+    q: string,
+    params?: Omit<SearchParams<F>, "q" | "type">,
+  ): Promise<Page<Pick<Post, F>>> {
+    return this.query<F>({ ...params, q, type: "post" });
+  }
+
+  /**
+   * Search comments with query text.
+   */
+  async comments<F extends keyof Post = keyof Post>(
+    q: string,
+    params?: Omit<SearchParams<F>, "q" | "type">,
+  ): Promise<Page<Pick<Post, F>>> {
+    return this.query<F>({ ...params, q, type: "comment" });
+  }
+
+  /**
+   * Search actors with query text.
+   */
+  async actors(
+    q: string,
+    params?: Omit<SearchParams, "q" | "type">,
+  ): Promise<Page<ActorSummary>> {
+    const query: Record<string, unknown> = {
+      q,
+      type: "actor",
+      cursor: params?.cursor,
+      limit: params?.limit,
+    };
+
+    const res = await this.transport.request<ActorSearchResponse>({
+      method: "GET",
+      path: "/search",
+      query,
+    });
+
+    return {
+      items: res.data.results,
       nextCursor: res.data.nextCursor ?? null,
     };
   }

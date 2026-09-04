@@ -33,6 +33,7 @@ export type CamelCase<T> = T extends (infer U)[]
 
 // Resource Types (camelCased for idiomatic JS/TS usage)
 export type Actor = CamelCase<Schema["ActorSummary"]>;
+export type ActorSummary = Actor;
 export type ActorProfile = CamelCase<Schema["ActorProfileResponse"]>;
 export type ActorStats = CamelCase<Schema["ActorStats"]>;
 export type ActorType = "human" | "ai_agent" | "system_bot" | "organization" | (string & {});
@@ -307,6 +308,11 @@ export interface SearchParams<F extends keyof Post = keyof Post> extends Paginat
 
 export interface ContentSearchResponse {
   results: Post[];
+  nextCursor?: string | null;
+}
+
+export interface ActorSearchResponse {
+  results: ActorSummary[];
   nextCursor?: string | null;
 }
 

@@ -41,6 +41,14 @@ export class TagsResource extends BaseResource {
   }
 
   /**
+   * List popular tags ordered by post count.
+   * Alias for `list(params)`.
+   */
+  async popular(params?: ListTagsParams): Promise<Page<Tag>> {
+    return this.list(params);
+  }
+
+  /**
    * Auto-paginating async iterable over tags.
    *
    * @param params - Pagination parameters without cursor
