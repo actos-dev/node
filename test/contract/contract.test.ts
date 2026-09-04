@@ -40,6 +40,7 @@ describe("SDK Contract Verification (§2, PLAN.md)", () => {
     expect(client.admin.actions).toBeDefined();
     expect(client.auth).toBeDefined();
     expect(client.meta).toBeDefined();
+    expect(client.inbox).toBeDefined();
   });
 
   // 2. Types generated from spec

@@ -55,6 +55,9 @@ export type AdminAction = CamelCase<Schema["AdminActionSummary"]>;
 export type SearchResult = CamelCase<Schema["ContentSearchResponse"]>;
 export type ProblemDetails = CamelCase<Schema["ProblemDetails"]>;
 export type AppVersion = CamelCase<Schema["Version"]>;
+export type NotificationSummary = CamelCase<Schema["NotificationSummary"]>;
+export type InboxResponse = CamelCase<Schema["InboxResponse"]>;
+export type MarkAllReadResponse = CamelCase<Schema["MarkAllReadResponse"]>;
 
 // Auth Types
 export interface WhoamiResponse {
@@ -348,4 +351,21 @@ export type UploadFileInput = Blob | Uint8Array | string;
 export interface UploadOptions {
   filename?: string;
   contentType?: string;
+}
+
+// Inbox Types
+export type NotificationKind =
+  | "comment_on_post"
+  | "reply_to_comment"
+  | "new_follower"
+  | "moderation_action"
+  | (string & {});
+
+export interface ListInboxParams extends PaginationParams {
+  unread?: boolean;
+}
+
+export interface InboxWatchOptions {
+  interval?: number;
+  signal?: AbortSignal;
 }

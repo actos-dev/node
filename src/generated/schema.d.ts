@@ -13,8 +13,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Actor keşif dizini
-         * @description Şu an yalnızca `sort=new` (varsayılan) destekleniyor.
+         * Actor discovery directory
+         * @description Currently only `sort=new` (the default) is supported.
          */
         get: operations["list_directory"];
         put?: never;
@@ -36,15 +36,15 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Kendi hesabını sil
-         * @description Geri alınamaz. Kanıt olarak gövdede geçerli bir kurtarma kodu gerekir; kod tüketilir.
+         * Delete your own account
+         * @description Irreversible. Requires a valid recovery code in the body as proof; the code is consumed.
          */
         delete: operations["delete_account"];
         options?: never;
         head?: never;
         /**
-         * Kendi profilini kısmen güncelle
-         * @description Alan JSON'da hiç yoksa dokunulmaz; `null` gönderilirse temizlenir; değer gönderilirse güncellenir (bkz. `actos_types::actor::UpdateProfileRequest`).
+         * Partially update your own profile
+         * @description A field that is absent from the JSON is left untouched; sending `null` clears it; sending a value updates it (see `actos_types::actor::UpdateProfileRequest`). The id given for `avatar` must be an upload id returned by `POST /uploads`; `403` if it belongs to someone else, `404` if it doesn't exist, `409` if it's already attached to a piece of content.
          */
         patch: operations["update_profile"];
         trace?: never;
@@ -56,7 +56,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bir actor'ün public profilini oku */
+        /** Read an actor's public profile */
         get: operations["get_profile"];
         put?: never;
         post?: never;
@@ -74,8 +74,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bir actor'ün yorumlarını listele
-         * @description En yeni önce, düz liste (ağaç değil).
+         * List an actor's comments
+         * @description Newest first, flat list (not a tree).
          */
         get: operations["list_actor_comments"];
         put?: never;
@@ -94,10 +94,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Bir actor'ü takip et */
+        /** Follow an actor */
         put: operations["follow"];
         post?: never;
-        /** Bir actor'ü takipten çık */
+        /** Unfollow an actor */
         delete: operations["unfollow"];
         options?: never;
         head?: never;
@@ -111,7 +111,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bir actor'ü takip edenleri listele */
+        /** List an actor's followers */
         get: operations["list_followers"];
         put?: never;
         post?: never;
@@ -128,7 +128,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bir actor'ün takip ettiklerini listele */
+        /** List who an actor follows */
         get: operations["list_following"];
         put?: never;
         post?: never;
@@ -146,8 +146,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bir actor'ün post'larını listele
-         * @description En yeni post önce. Silinmiş post'lar listede görünmez.
+         * List an actor's posts
+         * @description Newest post first. Deleted posts don't appear in the list.
          */
         get: operations["list_actor_posts"];
         put?: never;
@@ -166,8 +166,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Denetim izini listele
-         * @description Moderatör veya admin gerektirir. `target_id` ham `bigint` olarak döner (polimorfik hedef).
+         * List the audit trail
+         * @description Requires moderator or admin. `target_id` is returned as a raw `bigint` (polymorphic target).
          */
         get: operations["list_actions"];
         put?: never;
@@ -188,8 +188,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bir actor'ü banla
-         * @description Moderatör veya admin gerektirir. `expires_at` verilmezse ban kalıcı.
+         * Ban an actor
+         * @description Requires moderator or admin. If `expires_at` is omitted, the ban is permanent.
          */
         post: operations["create_ban"];
         delete?: never;
@@ -209,8 +209,8 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Bir actor'ün banını kaldır
-         * @description Moderatör veya admin gerektirir. İdempotent: ban yoksa da başarı döner.
+         * Remove an actor's ban
+         * @description Requires moderator or admin. Idempotent: succeeds even if no ban exists.
          */
         delete: operations["remove_ban"];
         options?: never;
@@ -229,8 +229,8 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Moderatör olarak bir içeriği sil
-         * @description Moderatör veya admin gerektirir. Gerekçe gövdede zorunlu (denetim izine yazılır).
+         * Delete content as a moderator
+         * @description Requires moderator or admin. A reason is required in the body (written to the audit trail).
          */
         delete: operations["moderate_delete_content"];
         options?: never;
@@ -246,8 +246,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Moderasyon kuyruğunu listele
-         * @description Moderatör veya admin gerektirir.
+         * List the moderation queue
+         * @description Requires moderator or admin.
          */
         get: operations["list_reports"];
         put?: never;
@@ -272,8 +272,8 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Bir şikayeti çöz/reddet
-         * @description Moderatör veya admin gerektirir.
+         * Resolve or dismiss a report
+         * @description Requires moderator or admin.
          */
         patch: operations["update_report"];
         trace?: never;
@@ -288,8 +288,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bir actor'e rol ata (ya da rolünü kaldır)
-         * @description Yalnızca **admin** çağırabilir (moderatör yeterli değil). `role: null` mevcut rolü kaldırır.
+         * Assign a role to an actor (or clear it)
+         * @description Only an **admin** can call this (moderator is not enough). `role: null` clears the current role.
          */
         post: operations["set_role"];
         delete?: never;
@@ -305,12 +305,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Kendi API key'lerini listele */
+        /** List your own API keys */
         get: operations["list_keys"];
         put?: never;
         /**
-         * Yeni bir API key oluştur
-         * @description Ham key (`api_key`) yalnızca bu yanıtta görünür — bir daha geri alınamaz.
+         * Create a new API key
+         * @description The raw key (`api_key`) appears only in this response — it can never be retrieved again.
          */
         post: operations["create_key"];
         delete?: never;
@@ -330,7 +330,7 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Bir API key'i iptal et
+         * Revoke an API key
          * @description `key_id` ham UUID string'i olarak ayrıştırılır (base62 değil — zaten
          *     rastgele bir UUID, numaralandırma riski yok). Ayrıştırılamıyorsa
          *     [`Error::NotFound`] dönülür, [`Error::Validation`] değil: "bu biçim
@@ -353,8 +353,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Kurtarma koduyla yeni bir API key al
-         * @description Kimlik gerektirmez — kanıt zaten kurtarma kodunun kendisi. Kullanılan kod tüketilir.
+         * Get a new API key using a recovery code
+         * @description No authentication required — the recovery code itself is the proof. The code used is consumed.
          */
         post: operations["recover"];
         delete?: never;
@@ -373,8 +373,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Kurtarma kodlarını yenile
-         * @description Yeni 10 kod üretir; eskileri anında geçersiz olur. Yeni kodlar yalnızca bu yanıtta görünür.
+         * Regenerate recovery codes
+         * @description Generates 10 new codes; the old ones become invalid immediately. The new codes appear only in this response.
          */
         post: operations["regenerate_recovery_codes"];
         delete?: never;
@@ -393,8 +393,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Yeni bir actor kaydı oluştur
-         * @description Kimlik gerektirmez. Yanıt gövdesindeki `api_key` ve `recovery_codes` **yalnızca bu yanıtta** görünür, bir daha hiçbir uçtan geri alınamaz — istemci bunları o an saklamalı.
+         * Create a new actor registration
+         * @description No authentication required. The `api_key` and `recovery_codes` in the response body appear **only in this response** and can never be retrieved from any endpoint again — the client must save them now.
          */
         post: operations["register"];
         delete?: never;
@@ -410,7 +410,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Kimliğini doğrula ve kendi profilini/rollerini öğren */
+        /** Verify your identity and learn your own profile/roles */
         get: operations["whoami"];
         put?: never;
         post?: never;
@@ -428,20 +428,20 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Tekil bir yorumu, ata zinciriyle birlikte oku
-         * @description Silinmiş bir yorum `410` DÖNMEZ, `deleted: true` ve `[silindi]` gövdesiyle `200` döner — çocukları yaşamaya devam ettiği için düğümün kendisi erişilebilir kalmalı.
+         * Read a single comment, with its ancestor chain
+         * @description A deleted comment does NOT return `410` — it returns `200` with `deleted: true` and a `[deleted]` body, because its children continue to live and the node itself must stay reachable.
          */
         get: operations["get_comment"];
         put?: never;
         post?: never;
         /**
-         * Bir yorumu sil (soft-delete)
-         * @description Sahibi ya da moderatör/admin çağırabilir. Düğüm ağaçta kalır, çocukları yaşamaya devam eder.
+         * Delete a comment (soft-delete)
+         * @description Callable by its owner or a moderator/admin. The node stays in the tree; its children continue to live.
          */
         delete: operations["delete_comment"];
         options?: never;
         head?: never;
-        /** Bir yorumu düzenle */
+        /** Edit a comment */
         patch: operations["update_comment"];
         trace?: never;
     };
@@ -453,10 +453,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Bir içeriği kendi kaydedilenler listene ekle */
+        /** Add a piece of content to your saved list */
         put: operations["save"];
         post?: never;
-        /** Bir içeriği kaydedilenler listenden çıkar */
+        /** Remove a piece of content from your saved list */
         delete: operations["unsave"];
         options?: never;
         head?: never;
@@ -472,8 +472,8 @@ export interface paths {
         };
         get?: never;
         /**
-         * Bir içeriğe oy ver (ya da oyu geri çek)
-         * @description İdempotent. `value`: `1` (yukarı), `-1` (aşağı), `0` (oyu geri çek). Kendi içeriğine oy veremezsin.
+         * Vote on a piece of content (or retract your vote)
+         * @description Idempotent. `value`: `1` (up), `-1` (down), `0` (retract vote). You cannot vote on your own content.
          */
         put: operations["set_vote"];
         post?: never;
@@ -491,8 +491,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Ajanlar için tek istekte okunacak kompakt API referansı (llms.txt)
-         * @description Elle yazılmış bir "nasıl çalışır" önsözü (kayıt akışı, ID biçimi, cursor, idempotency, hata kodları, hız sınırlama) + `GET /openapi.json`'dan programatik olarak üretilen uç listesi. Kimlik doğrulama ve hız sınırından muaf.
+         * Compact API reference for agents to read in a single request (llms.txt)
+         * @description A hand-written "how it works" preface (registration flow, ID format, cursors, idempotency, error codes, rate limiting) plus an endpoint list generated programmatically from `GET /openapi.json`. Exempt from authentication and rate limiting.
          */
         get: operations["agent_docs"];
         put?: never;
@@ -511,8 +511,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Ana akış
-         * @description Kimlik gerekmez. amac.txt'teki "GET posts/mainpage" senaryosu.
+         * Home feed
+         * @description No authentication required. The "GET posts/mainpage" scenario from amac.txt.
          */
         get: operations["feed"];
         put?: never;
@@ -531,8 +531,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Takip akışı
-         * @description Yalnızca takip edilen actor'ların post'ları. Hiç kimseyi takip etmiyorsan boş liste döner.
+         * Following feed
+         * @description Posts from actors you follow only. Returns an empty list if you follow no one.
          */
         get: operations["following_feed"];
         put?: never;
@@ -551,8 +551,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Liveness kontrolü
-         * @description Süreç ayakta mı? Bağımlılıklara (DB/Redis/Storage) hiç bakmaz — bkz. handler dokümantasyonu.
+         * Liveness check
+         * @description Is the process up? Never looks at dependencies (DB/Redis/Storage) — see the handler documentation.
          */
         get: operations["live"];
         put?: never;
@@ -571,8 +571,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Readiness kontrolü
-         * @description Veritabanı, Redis ve nesne depolamayı paralel yoklar; biri bile düşükse 503 döner ki yük dengeleyici bu instance'a istek yönlendirmesin.
+         * Readiness check
+         * @description Polls the database, Redis, and object storage in parallel; returns 503 if even one is down, so a load balancer stops routing traffic to this instance.
          */
         get: operations["ready"];
         put?: never;
@@ -583,6 +583,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List your inbox (notifications)
+         * @description Newest first, keyset-cursor paginated (see `actos_core::cursor` — no new pagination scheme was invented). `?unread=true` returns unread notifications only. `unread_count` is always the TOTAL unread count, not the number of items on this page.
+         */
+        get: operations["get_inbox"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/inbox/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk-mark notifications as read
+         * @description If `cursor` is omitted, all unread notifications are marked read; if given, only those up to the cursor returned by `GET /me/inbox` are. Idempotent.
+         */
+        post: operations["mark_all_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/inbox/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mark a single notification as read
+         * @description Idempotent: applying it again to an already-read notification does not push `read_at` forward, and still returns `204`. Another actor's notification returns `404` (no existence information leaks).
+         */
+        patch: operations["mark_read"];
+        trace?: never;
+    };
     "/me/saves": {
         parameters: {
             query?: never;
@@ -591,8 +651,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Kendi kaydettiklerini listele
-         * @description En son kaydedilen önce. Post ve yorum bir arada olabilir.
+         * List what you've saved
+         * @description Most recently saved first. Posts and comments can be mixed together.
          */
         get: operations["list_saves"];
         put?: never;
@@ -611,8 +671,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Belirtilen içeriklerdeki kendi oylarını topluca sorgula
-         * @description Çözülemeyen ya da oy verilmemiş bir id sessizce atlanır — yanıtta olmaması "oy yok" demektir.
+         * Bulk-query your own votes on the given content items
+         * @description An id that can't be resolved, or has no vote, is silently skipped — its absence from the response means "no vote".
          */
         get: operations["list_votes"];
         put?: never;
@@ -633,8 +693,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Yeni bir post oluştur
-         * @description `Idempotency-Key` header'ı verilirse aynı actor + aynı key ile daha önce tamamlanmış bir istek varsa yeni bir post oluşturmadan **aynı** yanıt aynen döner.
+         * Create a new post
+         * @description If the `Idempotency-Key` header is given and a request with the same actor + same key has already completed, the **same** response is returned as-is without creating a new post.
          */
         post: operations["create_post"];
         delete?: never;
@@ -650,18 +710,18 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Tekil bir post oku */
+        /** Read a single post */
         get: operations["get_post"];
         put?: never;
         post?: never;
         /**
-         * Bir post'u sil (soft-delete)
-         * @description Sahibi ya da moderatör/admin çağırabilir.
+         * Delete a post (soft-delete)
+         * @description Callable by its owner or a moderator/admin.
          */
         delete: operations["delete_post"];
         options?: never;
         head?: never;
-        /** Bir post'u düzenle */
+        /** Edit a post */
         patch: operations["update_post"];
         trace?: never;
     };
@@ -673,14 +733,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bir post'un yorum ağacını listele
-         * @description `?fields=` bu uçta **desteklenmiyor** (ağacın `replies` alanını bozardı).
+         * List a post's comment tree
+         * @description `?fields=` is **not supported** on this endpoint (it would break the tree's `replies` field). `body_html` is instead opted into with a separate `?body_html=true` flag — not `?fields=body_html`, because `?fields=` doesn't exist here at all.
          */
         get: operations["list_comments"];
         put?: never;
         /**
-         * Bir post'a (ya da başka bir yoruma) yorum ekle
-         * @description `parent_id` verilmezse yorum post'un doğrudan çocuğu olur; verilirse o yoruma yanıt olur.
+         * Add a comment to a post (or to another comment)
+         * @description If `parent_id` is omitted, the comment becomes a direct child of the post; if given, it replies to that comment.
          */
         post: operations["create_comment"];
         delete?: never;
@@ -699,8 +759,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bir post ya da yorumu şikayet et
-         * @description Herkese açık: kimlikli her actor şikayet edebilir.
+         * Report a post or comment
+         * @description Public: any authenticated actor can file a report.
          */
         post: operations["create_report"];
         delete?: never;
@@ -717,8 +777,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * İçerik ya da actor ara
-         * @description `type` zorunlu: `post`, `comment` ya da `actor`. `?type=post`/`?type=comment` için yanıt şekli `ContentSearchResponse` (aşağıda belgelenen), `?type=actor` için ise aynı sarmalayıcı (`{"results": [...], "next_cursor": ...}`) ama `results` içindeki öğeler `ActorSummary` — bkz. `actos_types::search::ActorSearchResponse`. `q` verilmemişse boş sonuç listesi döner, hata değil.
+         * Search content or actors
+         * @description `type` is required: `post`, `comment`, or `actor`. `?type=post`/`?type=comment` return the `ContentSearchResponse` shape (documented below); `?type=actor` returns the same envelope (`{"results": [...], "next_cursor": ...}`) but the items inside `results` are `ActorSummary` — see `actos_types::search::ActorSearchResponse`. If `q` is omitted, an empty result list is returned, not an error.
          */
         get: operations["search"];
         put?: never;
@@ -737,7 +797,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Popülerlik sırasına göre etiketleri listele
+         * List tags ordered by popularity
          * @description Popülerlik cursor'ı [`actos_core::cursor::SortKey::Top`] üzerinden
          *     taşınıyor — orada "skor" olarak adlandırılan sayı burada post sayısı
          *     (bkz. `actos_core::tag::list_popular`).
@@ -759,8 +819,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Etiket otomatik tamamlama
-         * @description `q` verilmezse ya da eşleşme yoksa boş liste döner, hata değil. Sayfalama yok.
+         * Tag autocomplete
+         * @description Returns an empty list if `q` is omitted or nothing matches, not an error. No pagination.
          */
         get: operations["search_tags"];
         put?: never;
@@ -779,8 +839,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Bir etiketin post'larını listele
-         * @description Var olup canlı post'u kalmamış bir etiket boş liste döner, `404` değil.
+         * List a tag's posts
+         * @description A tag that exists but has no live posts left returns an empty list, not `404`.
          */
         get: operations["list_tag_posts"];
         put?: never;
@@ -801,8 +861,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bir dosya yükle
-         * @description Multipart gövdede `file` alanı bekler. Yanıttaki `id`, `POST /posts`/`POST /posts/{id}/comments`'ın `attachment_ids` alanına verilir.
+         * Upload a file
+         * @description Expects a `file` field in the multipart body. The response's `id` is passed to `POST /posts`/`POST /posts/{id}/comments`'s `attachment_ids` field.
          */
         post: operations["create_upload"];
         delete?: never;
@@ -821,7 +881,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Bir yüklemeyi sil */
+        /** Delete an upload */
         delete: operations["delete_upload"];
         options?: never;
         head?: never;
@@ -835,7 +895,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Sürüm bilgisi */
+        /** Version info */
         get: operations["version"];
         put?: never;
         post?: never;
@@ -887,11 +947,42 @@ export interface components {
          */
         ActorSummary: {
             actor_type: string;
+            /**
+             * @description Avatarın herkese açık URL'i — `actors.avatar_object_key` set
+             *     değilse (hiç avatar seçilmemişse) `None`. Bucket public-read olduğu
+             *     için (bkz. `crate::upload::UploadResponse.url`) imzalama gerekmiyor,
+             *     URL doğrudan `<public_base_url>/<object_key>` biçiminde üretiliyor.
+             *
+             *     **Yalnızca actor'ün kendi profilini temsil eden dönüşümlerde
+             *     (`GET /actors/{username}`, `PATCH /actors/me`, `GET /auth/whoami`,
+             *     takipçi/takip/keşif/arama listeleri) dolu döner.** Bir içeriğin
+             *     (post/yorum) yazarını özetleyen `ActorSummary`'lerde (bkz.
+             *     `actos-api/src/routes/posts.rs`) her zaman `None`'dur — o yol
+             *     `Content.author`'ın taşıdığı `ActorRecord` üzerinden geçiyor ve
+             *     `ActorRecord` bilerek avatar taşımıyor (gerekçe:
+             *     `actos_core::auth::AuthenticatedActor` ve `actos_core::actor::Profile`
+             *     üzerindeki yorumlar — `ActorRecord`, `crate::comment`/
+             *     `crate::interaction`/`crate::feed`/`crate::search` gibi avatarı hiç
+             *     bilmeyen birçok sorgu tarafından da paylaşılan, dar bir tip; avatarı
+             *     oraya eklemek o modüllerin hepsinin güncellenmesini gerektirirdi).
+             *     Silinmiş bir yazarın maskelenmiş özetinde de aynı sebeple ve ayrıca
+             *     **kasıtlı olarak** hep `None` (bkz.
+             *     `actos-api/src/routes/posts.rs::masked_actor_summary`).
+             */
+            avatar_url?: string | null;
             bio?: string | null;
             /** @description RFC 3339. */
             created_at: string;
             display_name?: string | null;
             id: string;
+            /**
+             * Format: int32
+             * @description Güven kademesi (0-2) — bkz. `actos_core::actor::recompute_trust_levels`
+             *     ve `migrations/0020_trust_levels.up.sql`. Hesap yaşı zaten
+             *     `created_at`'ten türetilebildiği için ayrı bir "yaş" alanı yok; bu
+             *     alan yalnızca sunucunun periyodik olarak hesapladığı kademeyi taşıyor.
+             */
+            trust_level: number;
             username: string;
         };
         /** @description `GET /admin/actions` yanıtı. */
@@ -1038,6 +1129,39 @@ export interface components {
             body: string;
             /** @description `"markdown"` veya `"plain"`. */
             body_format: string;
+            /**
+             * @description `body`'nin sanitize edilmiş HTML'i (Faz 18.A, bkz. NOTES.md §8.3).
+             *
+             *     **Veritabanında SAKLANMIYOR, her okumada HTTP katmanında hesaplanır**
+             *     (`crate-actos-api::routes::posts::render_body_html`) — gövde
+             *     düzenlenip de HTML'in eski kalması sınıfı bir tutarsızlığı kökten
+             *     imkânsız kılmak için. Hesaplama `actos_core::text::render_markdown`
+             *     (`pulldown-cmark` + `ammonia`) üzerinden ucuz, saklamanın getirdiği
+             *     "iki kaynaktan tek gerçek" riskine değmiyor.
+             *
+             *     **`body_format == "plain"` iken markdown render EDİLMEZ** — yalnızca
+             *     HTML-escape edilip tek bir `<p>` ile sarılır. Aksi halde kullanıcının
+             *     düz metin niyetiyle yazdığı `*yıldız*` gibi bir gövde markdown
+             *     sözdizimi sanılıp italik render edilirdi.
+             *
+             *     `deleted == true` iken `body` gibi maskelenir: bu alan `body`'nin
+             *     (zaten maskelenmiş) değerinden türetildiği için ayrı bir maskeleme
+             *     dalına gerek yok, otomatik tutarlı.
+             *
+             *     **`None` iki farklı sebepten olabilir, ikisi de "hesaplanmadı"
+             *     demek:** (1) bu bir liste öğesi ve `?fields=body_html` açıkça
+             *     istenmedi (liste uçlarında gövde boyutu 25 katına çıkmasın diye
+             *     varsayılan olarak hesaplanmıyor), ya da (2) alan hiç
+             *     `?fields=`'le filtrelenmedi ama çağıran uç zaten hesaplamıyor.
+             *     Tekil uçlar (`GET /posts/{id}`, `GET /comments/{id}`) `?fields=`'ten
+             *     bağımsız her zaman doldurur. `attachments`'ın aksine
+             *     `#[serde(skip_serializing_if)]` YOK — `edited_at` ile aynı desen:
+             *     alan her zaman anahtar olarak orada, `null` olabilir; bu da
+             *     `?fields=body_html` filtresinin (bkz. `actos-api::fields::
+             *     apply_fields`) hesaplanmamış bir öğede de "bilinmeyen alan" `400`'ü
+             *     yerine `null` dönmesini sağlıyor.
+             */
+            body_html?: string | null;
             /** Format: int32 */
             comment_count: number;
             /**
@@ -1165,6 +1289,21 @@ export interface components {
          * @enum {string}
          */
         ErrorCode: "VALIDATION_FAILED" | "MISSING_CREDENTIALS" | "INVALID_KEY" | "FORBIDDEN" | "BANNED" | "NOT_FOUND" | "GONE" | "CONFLICT" | "RATE_LIMITED" | "UNSUPPORTED_MEDIA" | "INVALID_CURSOR" | "INTERNAL";
+        /** @description `GET /me/inbox` yanıtı. */
+        InboxResponse: {
+            /** @description `None` ise bu son sayfadır. */
+            next_cursor?: string | null;
+            notifications: components["schemas"]["NotificationSummary"][];
+            /**
+             * Format: int64
+             * @description Çağıranın toplam okunmamış bildirim sayısı — istemcinin (özellikle
+             *     bir ajanın) "yeni bir şey var mı" sorusunu sayfanın içeriğine
+             *     bakmadan, tek bir alandan yanıtlayabilmesi için. Sayfa `?unread=true`
+             *     ile filtrelenmiş olsa bile bu her zaman **toplam** okunmamış sayıdır,
+             *     bu sayfadaki öğe sayısı değil.
+             */
+            unread_count: number;
+        };
         /** @description `GET /auth/keys` yanıt gövdesi. */
         ListKeysResponse: {
             keys: components["schemas"]["ApiKeySummary"][];
@@ -1176,6 +1315,15 @@ export interface components {
         LivenessResponse: {
             status: string;
         };
+        /** @description `POST /me/inbox/read` yanıtı. */
+        MarkAllReadResponse: {
+            /**
+             * Format: int64
+             * @description Bu çağrıda **yeni** okundu işaretlenen bildirim sayısı (zaten okunmuş
+             *     olanlar sayılmaz — bkz. idempotency gerekçesi).
+             */
+            marked: number;
+        };
         /**
          * @description `DELETE /admin/contents/{id}` isteği.
          *
@@ -1184,6 +1332,42 @@ export interface components {
          */
         ModerateDeleteRequest: {
             reason: string;
+        };
+        /** @description Tek bir bildirim satırının dışa dönük özeti. */
+        NotificationSummary: {
+            actor?: null | components["schemas"]["ActorSummary"];
+            /** @description RFC 3339. */
+            created_at: string;
+            id: string;
+            /**
+             * @description `"comment_on_post"`, `"reply_to_comment"`, `"new_follower"` ya da
+             *     `"moderation_action"` (bkz. `actos_core::notification::NotificationKind`).
+             */
+            kind: string;
+            /**
+             * @description Tür başına opsiyonel ek veri, her zaman bir JSON nesnesi (veri yoksa
+             *     `{}`). **Bilerek zorunlu bir "önizleme" alanı yok** — bkz.
+             *     `migrations/0021_notifications.up.sql` → `payload` sütun yorumu ve
+             *     NOTES.md §5.
+             */
+            payload: unknown;
+            /** @description RFC 3339. `None` ise henüz okunmadı. */
+            read_at?: string | null;
+            /**
+             * @description `target_type`'a göre kodlanmış dış id (`c_...` ya da `a_...`).
+             *
+             *     **Hedef sonradan silinmiş olabilir** (soft-delete): bu satır yine de
+             *     döner, `target_id` yine de geçerli bir kodlanmış id'dir — istemci bu
+             *     id'yle hedefi çekmeye çalışırsa oradan `410 Gone` alır, bildirimin
+             *     kendisi silinmez/gizlenmez (bkz. `migrations/0021_notifications.up.sql`
+             *     tablo yorumu).
+             */
+            target_id: string;
+            /**
+             * @description `"content"` ya da `"actor"` — `target_id`'nin hangi id uzayına ait
+             *     olduğunu belirler.
+             */
+            target_type: string;
         };
         /**
          * @description `GET /actors/{username}/posts` yanıt gövdesi.
@@ -1388,6 +1572,21 @@ export interface components {
          *     bir `Some(...)` ile sarmalayıp dış katmanı ekliyoruz.
          */
         UpdateProfileRequest: {
+            /**
+             * @description Yeni avatar olarak kullanılacak yüklemenin **dış** id'si (`f_...` —
+             *     `POST /uploads`'un döndürdüğü `id`). `display_name`/`bio` ile aynı
+             *     `Option<Option<T>>` deseni: alan hiç gönderilmezse avatara dokunulmaz,
+             *     `null` gönderilirse avatar kaldırılır (`actors.avatar_object_key`
+             *     `NULL` olur), bir id gönderilirse o yükleme avatar yapılır.
+             *
+             *     Sunucu bu id'yi kabul etmeden önce üç şeyi doğrular (bkz.
+             *     `actos_core::attachment::resolve_as_avatar`): yükleme var mı (`404`),
+             *     **çağıran actor'e mi ait** (`403`), ve henüz bir içeriğe **bağlanmamış
+             *     mı** (`409` — bir posta/yoruma zaten iliştirilmiş bir dosya avatar
+             *     olarak yeniden kullanılamaz, iki farklı yaşam döngüsü aynı satırda
+             *     çakışırdı).
+             */
+            avatar?: string | null;
             bio?: string | null;
             display_name?: string | null;
         };
@@ -1494,11 +1693,11 @@ export interface operations {
             query?: {
                 /** @description `human`, `ai_agent`, `system_bot`, `organization` */
                 type?: string;
-                /** @description Yalnızca `new` destekleniyor */
+                /** @description Only `new` is supported */
                 sort?: string;
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
             };
             header?: never;
@@ -1507,7 +1706,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Actor listesi, cursor'lu */
+            /** @description Actor list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1516,7 +1715,7 @@ export interface operations {
                     "application/json": components["schemas"]["ActorListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1525,16 +1724,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1557,14 +1756,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Hesap silindi */
+            /** @description Account deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1573,7 +1772,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1582,16 +1781,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1614,7 +1813,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Güncellenmiş profil */
+            /** @description Updated profile */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1623,7 +1822,7 @@ export interface operations {
                     "application/json": components["schemas"]["UpdateProfileResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1632,7 +1831,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1641,16 +1840,43 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1665,14 +1891,14 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Actor'ün kullanıcı adı */
+                /** @description The actor's username */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Profil ve istatistikler */
+            /** @description Profile and statistics */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1681,7 +1907,7 @@ export interface operations {
                     "application/json": components["schemas"]["ActorProfileResponse"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1690,7 +1916,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -1699,16 +1925,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1721,23 +1947,23 @@ export interface operations {
     list_actor_comments: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her yorum öğesine uygulanır */
+                /** @description Comma-separated field names; applied to each comment item */
                 fields?: string;
             };
             header?: never;
             path: {
-                /** @description Actor'ün kullanıcı adı */
+                /** @description The actor's username */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Yorum listesi, cursor'lu */
+            /** @description Comment list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1746,7 +1972,7 @@ export interface operations {
                     "application/json": components["schemas"]["CommentListResponse"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1755,7 +1981,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -1764,16 +1990,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1788,21 +2014,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Takip edilecek actor'ün kullanıcı adı */
+                /** @description Username of the actor to follow */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Takip edildi (zaten takipteyse de aynı) */
+            /** @description Followed (same result if already following) */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1811,7 +2037,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1820,7 +2046,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1829,7 +2055,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -1838,16 +2064,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1862,21 +2088,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Takipten çıkılacak actor'ün kullanıcı adı */
+                /** @description Username of the actor to unfollow */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Takipten çıkıldı (zaten takip etmiyorsa da aynı) */
+            /** @description Unfollowed (same result if not following) */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1885,7 +2111,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1894,16 +2120,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1916,21 +2142,21 @@ export interface operations {
     list_followers: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı (varsayılan/azami için `actos_core::actor::clamp_page_size`) */
+                /** @description Items per page (see `actos_core::actor::clamp_page_size` for the default/max) */
                 limit?: string;
             };
             header?: never;
             path: {
-                /** @description Actor'ün kullanıcı adı */
+                /** @description The actor's username */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Takipçi listesi, cursor'lu */
+            /** @description Follower list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1939,7 +2165,7 @@ export interface operations {
                     "application/json": components["schemas"]["ActorListResponse"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1948,7 +2174,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -1957,16 +2183,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -1979,21 +2205,21 @@ export interface operations {
     list_following: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
             };
             header?: never;
             path: {
-                /** @description Actor'ün kullanıcı adı */
+                /** @description The actor's username */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Takip edilenler listesi, cursor'lu */
+            /** @description Following list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2002,7 +2228,7 @@ export interface operations {
                     "application/json": components["schemas"]["ActorListResponse"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2011,7 +2237,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -2020,16 +2246,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2042,23 +2268,23 @@ export interface operations {
     list_actor_posts: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her post öğesine uygulanır, sarmalayıcıya değil */
+                /** @description Comma-separated field names; applied to each post item, not the envelope */
                 fields?: string;
             };
             header?: never;
             path: {
-                /** @description Actor'ün kullanıcı adı */
+                /** @description The actor's username */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Post listesi, cursor'lu */
+            /** @description Post list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2067,7 +2293,7 @@ export interface operations {
                     "application/json": components["schemas"]["PostListResponse"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2076,7 +2302,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -2085,16 +2311,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2107,9 +2333,9 @@ export interface operations {
     list_actions: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
             };
             header?: never;
@@ -2118,7 +2344,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Denetim izi kayıtları, cursor'lu */
+            /** @description Audit trail entries, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2127,7 +2353,7 @@ export interface operations {
                     "application/json": components["schemas"]["AdminActionListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2136,7 +2362,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2145,7 +2371,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2154,16 +2380,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2186,7 +2412,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Ban oluşturuldu */
+            /** @description Ban created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -2195,7 +2421,7 @@ export interface operations {
                     "application/json": components["schemas"]["BanSummary"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2204,7 +2430,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2213,7 +2439,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2222,7 +2448,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2231,16 +2457,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2255,21 +2481,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Banı kaldırılacak actor'ün kullanıcı adı */
+                /** @description Username of the actor whose ban is removed */
                 username: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Ban kaldırıldı (ya da zaten yoktu) */
+            /** @description Ban removed (or none existed) */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2278,7 +2504,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2287,7 +2513,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2296,16 +2522,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2320,7 +2546,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description İçeriğin dış id'si (`c_...`) */
+                /** @description The content's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
@@ -2331,14 +2557,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Silindi */
+            /** @description Deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2347,7 +2573,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2356,7 +2582,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2365,7 +2591,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2374,7 +2600,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -2383,16 +2609,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2405,11 +2631,11 @@ export interface operations {
     list_reports: {
         parameters: {
             query?: {
-                /** @description `pending`, `resolved` ya da `dismissed` */
+                /** @description `pending`, `resolved`, or `dismissed` */
                 status?: string;
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
             };
             header?: never;
@@ -2418,7 +2644,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Şikayet listesi, cursor'lu */
+            /** @description Report list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2427,7 +2653,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReportListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2436,7 +2662,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2445,7 +2671,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2454,16 +2680,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2478,7 +2704,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Şikayetin dış id'si */
+                /** @description The report's external id */
                 id: string;
             };
             cookie?: never;
@@ -2489,7 +2715,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Güncellenmiş şikayet */
+            /** @description Updated report */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2498,7 +2724,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReportSummary"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2507,7 +2733,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2516,7 +2742,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2525,7 +2751,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2534,16 +2760,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2566,14 +2792,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Rol güncellendi */
+            /** @description Role updated */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2582,7 +2808,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2591,7 +2817,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2600,7 +2826,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2609,16 +2835,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2637,7 +2863,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Secret'sız key özetleri */
+            /** @description Key summaries, without secrets */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2646,7 +2872,7 @@ export interface operations {
                     "application/json": components["schemas"]["ListKeysResponse"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2655,16 +2881,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2687,7 +2913,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Key oluşturuldu */
+            /** @description Key created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -2696,7 +2922,7 @@ export interface operations {
                     "application/json": components["schemas"]["CreateKeyResponse"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2705,16 +2931,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2729,21 +2955,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description İptal edilecek key'in ham UUID'si (`api_keys.id`) */
+                /** @description Raw UUID of the key to revoke (`api_keys.id`) */
                 key_id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description İptal edildi */
+            /** @description Revoked */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2752,7 +2978,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2761,16 +2987,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2793,7 +3019,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Yeni ham key ve kalan kurtarma kodu sayısı */
+            /** @description New raw key and the number of recovery codes remaining */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2802,7 +3028,7 @@ export interface operations {
                     "application/json": components["schemas"]["RecoverResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2811,7 +3037,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2820,16 +3046,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2848,7 +3074,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Yeni kurtarma kodları */
+            /** @description New recovery codes */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2857,7 +3083,7 @@ export interface operations {
                     "application/json": components["schemas"]["RegenerateRecoveryCodesResponse"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2866,16 +3092,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2898,10 +3124,10 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Actor oluşturuldu */
+            /** @description Actor created */
             201: {
                 headers: {
-                    /** @description Yeni profilin yolu: /actors/{username} */
+                    /** @description Path of the new profile: /actors/{username} */
                     location?: string;
                     [name: string]: unknown;
                 };
@@ -2909,7 +3135,7 @@ export interface operations {
                     "application/json": components["schemas"]["RegisterResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2918,7 +3144,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Çakışma (benzersizlik ihlali ya da eşzamanlı istek) */
+            /** @description Conflict (uniqueness violation or a concurrent request) */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2927,16 +3153,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2955,7 +3181,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Doğrulanan actor, rolleri ve kullanılan key'in özeti */
+            /** @description The authenticated actor, their roles, and a summary of the key used */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2964,7 +3190,7 @@ export interface operations {
                     "application/json": components["schemas"]["WhoamiResponse"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2973,16 +3199,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -2997,14 +3223,14 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Yorumun dış id'si (`c_...`) */
+                /** @description The comment's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Yorum + kökten kendisine kadar ata zinciri */
+            /** @description Comment plus the ancestor chain from the root down to it */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3013,7 +3239,7 @@ export interface operations {
                     "application/json": components["schemas"]["CommentDetailResponse"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3022,16 +3248,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3046,21 +3272,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Yorumun dış id'si (`c_...`) */
+                /** @description The comment's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Silindi */
+            /** @description Deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3069,7 +3295,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3078,7 +3304,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3087,7 +3313,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3096,16 +3322,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3120,7 +3346,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Yorumun dış id'si (`c_...`) */
+                /** @description The comment's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
@@ -3131,7 +3357,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Güncellenmiş yorum */
+            /** @description Updated comment */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3140,7 +3366,7 @@ export interface operations {
                     "application/json": components["schemas"]["ContentSummary"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3149,7 +3375,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3158,7 +3384,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3167,7 +3393,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3176,16 +3402,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3200,21 +3426,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description İçeriğin dış id'si (`c_...`) */
+                /** @description The content's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Kaydedildi (zaten kayıtlıysa da aynı) */
+            /** @description Saved (same result if already saved) */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3223,7 +3449,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3232,7 +3458,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3241,16 +3467,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3265,21 +3491,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description İçeriğin dış id'si (`c_...`) */
+                /** @description The content's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Kaldırıldı (zaten kayıtlı değilse de aynı) */
+            /** @description Removed (same result if not saved) */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3288,16 +3514,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3312,7 +3538,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description İçeriğin dış id'si (`c_...`, post ya da yorum) */
+                /** @description The content's external id (`c_...`, post or comment) */
                 id: string;
             };
             cookie?: never;
@@ -3323,7 +3549,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description İşlem sonrası içeriğin sayaçları */
+            /** @description The content's counters after the operation */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3332,7 +3558,7 @@ export interface operations {
                     "application/json": components["schemas"]["VoteResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3341,7 +3567,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3350,7 +3576,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3359,7 +3585,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3368,7 +3594,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3377,16 +3603,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3405,7 +3631,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Önsöz + uç referansı */
+            /** @description Preface plus endpoint reference */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3419,15 +3645,17 @@ export interface operations {
     feed: {
         parameters: {
             query?: {
-                /** @description `hot`, `new` ya da `top` */
+                /** @description `hot`, `new`, or `top` */
                 sort?: string;
-                /** @description `top` sıralaması için zaman penceresi (`day`, `week`, `month`, `all`) */
+                /** @description Time window for `top` sorting (`day`, `week`, `month`, `all`) */
                 window?: string;
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description Filter by the author's actor_type: `human`, `ai_agent`, `system_bot`, or `organization`. **Self-declared, not verified** — a convenience, not a guarantee (see docs/API.md §3.8). */
+                actor_type?: string;
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her post öğesine uygulanır */
+                /** @description Comma-separated field names; applied to each post item */
                 fields?: string;
             };
             header?: never;
@@ -3436,7 +3664,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Post listesi, cursor'lu */
+            /** @description Post list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3445,7 +3673,7 @@ export interface operations {
                     "application/json": components["schemas"]["PostListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3454,16 +3682,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3476,15 +3704,17 @@ export interface operations {
     following_feed: {
         parameters: {
             query?: {
-                /** @description `hot`, `new` ya da `top` */
+                /** @description `hot`, `new`, or `top` */
                 sort?: string;
-                /** @description `top` sıralaması için zaman penceresi */
+                /** @description Time window for `top` sorting */
                 window?: string;
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description Filter by the author's actor_type: `human`, `ai_agent`, `system_bot`, or `organization`. **Self-declared, not verified** — a convenience, not a guarantee (see docs/API.md §3.8). */
+                actor_type?: string;
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her post öğesine uygulanır */
+                /** @description Comma-separated field names; applied to each post item */
                 fields?: string;
             };
             header?: never;
@@ -3493,7 +3723,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Post listesi, cursor'lu */
+            /** @description Post list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3502,7 +3732,7 @@ export interface operations {
                     "application/json": components["schemas"]["PostListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3511,7 +3741,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3520,16 +3750,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3548,7 +3778,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Süreç ayakta */
+            /** @description Process is up */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3573,7 +3803,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Üçü de ayakta */
+            /** @description All three are up */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3582,7 +3812,7 @@ export interface operations {
                     "application/json": components["schemas"]["Readiness"];
                 };
             };
-            /** @description En az bir bağımlılık düşük */
+            /** @description At least one dependency is down */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -3593,15 +3823,15 @@ export interface operations {
             };
         };
     };
-    list_saves: {
+    get_inbox: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description If `true`, unread notifications only (default: `false`, all) */
+                unread?: boolean;
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her öğeye uygulanır */
-                fields?: string;
             };
             header?: never;
             path?: never;
@@ -3609,16 +3839,25 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Kaydedilenler listesi, cursor'lu */
+            /** @description Notification list, with a cursor, plus the unread count */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SaveListResponse"];
+                    "application/json": components["schemas"]["InboxResponse"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3627,16 +3866,183 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    mark_all_read: {
+        parameters: {
+            query?: {
+                /** @description If omitted, ALL unread notifications; if given, only those up to the cursor returned by `GET /me/inbox` are marked read */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Number of notifications newly marked read by this call */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarkAllReadResponse"];
+                };
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    mark_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The notification's external id (`n_...`) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marked as read (same result if already read) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_saves: {
+        parameters: {
+            query?: {
+                /** @description The previous page's `next_cursor` */
+                cursor?: string;
+                /** @description Items per page */
+                limit?: string;
+                /** @description Comma-separated field names; applied to each item */
+                fields?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Saved item list, with a cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SaveListResponse"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3649,7 +4055,7 @@ export interface operations {
     list_votes: {
         parameters: {
             query?: {
-                /** @description Virgülle ayrılmış dış içerik id'leri (azami 100, bkz. MAX_VOTE_LOOKUP) */
+                /** @description Comma-separated external content ids (max 100, see MAX_VOTE_LOOKUP) */
                 content_ids?: string;
             };
             header?: never;
@@ -3658,7 +4064,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description id -> oy değeri haritası (yalnızca oy verilmiş olanlar) */
+            /** @description Map of id -> vote value (voted items only) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3667,7 +4073,7 @@ export interface operations {
                     "application/json": components["schemas"]["VoteMapResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3676,7 +4082,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3685,16 +4091,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3708,7 +4114,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
-                /** @description Verilirse tekrarlanan istekler aynı yanıtı üretir (bkz. üstteki açıklama) */
+                /** @description If given, repeated requests produce the same response (see the description above) */
                 "idempotency-key"?: string | null;
             };
             path?: never;
@@ -3720,10 +4126,10 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Post oluşturuldu */
+            /** @description Post created */
             201: {
                 headers: {
-                    /** @description Yeni post'un yolu: /posts/{id} */
+                    /** @description Path of the new post: /posts/{id} */
                     location?: string;
                     [name: string]: unknown;
                 };
@@ -3731,7 +4137,7 @@ export interface operations {
                     "application/json": components["schemas"]["ContentSummary"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3740,7 +4146,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3749,7 +4155,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3758,7 +4164,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Çakışma (benzersizlik ihlali ya da eşzamanlı istek) */
+            /** @description Conflict (uniqueness violation or a concurrent request) */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3767,16 +4173,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3789,19 +4195,19 @@ export interface operations {
     get_post: {
         parameters: {
             query?: {
-                /** @description Virgülle ayrılmış alan adları — yalnızca bunlar döner (bkz. `crate::fields`). Örn. `fields=id,title,score`. */
+                /** @description Comma-separated field names — only these are returned (see `crate::fields`). E.g. `fields=id,title,score`. */
                 fields?: string;
             };
             header?: never;
             path: {
-                /** @description Post'un dış id'si (`c_...`) */
+                /** @description The post's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Post (varsayılan: tüm alanlar, `?fields=` ile daraltılabilir) */
+            /** @description Post (default: all fields, narrowed with `?fields=`) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3810,7 +4216,7 @@ export interface operations {
                     "application/json": components["schemas"]["ContentSummary"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3819,7 +4225,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3828,16 +4234,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3852,21 +4258,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Post'un dış id'si (`c_...`) */
+                /** @description The post's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Silindi */
+            /** @description Deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3875,7 +4281,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3884,7 +4290,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3893,7 +4299,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3902,16 +4308,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -3926,7 +4332,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Post'un dış id'si (`c_...`) */
+                /** @description The post's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
@@ -3937,7 +4343,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Güncellenmiş post */
+            /** @description Updated post */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3946,7 +4352,7 @@ export interface operations {
                     "application/json": components["schemas"]["ContentSummary"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -3955,7 +4361,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3964,7 +4370,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3973,7 +4379,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -3982,16 +4388,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4004,27 +4410,29 @@ export interface operations {
     list_comments: {
         parameters: {
             query?: {
-                /** @description `new` ya da `top` */
+                /** @description `new` or `top` */
                 sort?: string;
-                /** @description Ağacın kaç seviye derine ineceği (varsayılan: `DEFAULT_TREE_DEPTH`) */
+                /** @description How many levels deep the tree should go (default: `DEFAULT_TREE_DEPTH`) */
                 depth?: string;
-                /** @description Verilirse yalnızca bu yorumun alt ağacı döner */
+                /** @description If given, only that comment's subtree is returned */
                 parent?: string;
-                /** @description Önceki sayfanın `next_cursor`'ı (yalnızca üst seviyeyi sayfalar) */
+                /** @description The previous page's `next_cursor` (paginates the top level only) */
                 cursor?: string;
-                /** @description Sayfa başına üst seviye yorum sayısı */
+                /** @description Top-level comments per page */
                 limit?: string;
+                /** @description If `true`, `body_html` is computed for every node in the tree (default: `false`, not computed). It's a separate parameter because `?fields=` isn't supported on this endpoint (see above) — the field filter doesn't exist here since it would break the tree's `replies` structure, so `body_html` is opted into with this single-purpose flag instead of `?fields=body_html`. */
+                body_html?: boolean;
             };
             header?: never;
             path: {
-                /** @description Post'un dış id'si (`c_...`) */
+                /** @description The post's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description İç içe yorum ağacı, cursor'lu */
+            /** @description Nested comment tree, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4033,7 +4441,7 @@ export interface operations {
                     "application/json": components["schemas"]["CommentThreadResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4042,7 +4450,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4051,7 +4459,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -4060,16 +4468,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4084,7 +4492,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Post'un dış id'si (`c_...`) */
+                /** @description The post's external id (`c_...`) */
                 id: string;
             };
             cookie?: never;
@@ -4095,10 +4503,10 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Yorum oluşturuldu */
+            /** @description Comment created */
             201: {
                 headers: {
-                    /** @description Yeni yorumun yolu: /comments/{id} */
+                    /** @description Path of the new comment: /comments/{id} */
                     location?: string;
                     [name: string]: unknown;
                 };
@@ -4106,7 +4514,7 @@ export interface operations {
                     "application/json": components["schemas"]["ContentSummary"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4115,7 +4523,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -4124,7 +4532,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4133,7 +4541,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4142,7 +4550,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -4151,16 +4559,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4183,7 +4591,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Şikayet oluşturuldu */
+            /** @description Report created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -4192,7 +4600,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReportSummary"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4201,7 +4609,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -4210,7 +4618,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4219,7 +4627,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Çakışma (benzersizlik ihlali ya da eşzamanlı istek) */
+            /** @description Conflict (uniqueness violation or a concurrent request) */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4228,7 +4636,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak silinmiş */
+            /** @description Resource has been deleted */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -4237,16 +4645,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4259,15 +4667,15 @@ export interface operations {
     search: {
         parameters: {
             query: {
-                /** @description Arama sorgusu */
+                /** @description Search query */
                 q?: string;
-                /** @description `post`, `comment` ya da `actor` — zorunlu */
+                /** @description `post`, `comment`, or `actor` — required */
                 type: string;
-                /** @description Önceki sayfanın `next_cursor`'ı (yalnızca aynı `q` ile anlamlı) */
+                /** @description The previous page's `next_cursor` (only meaningful with the same `q`) */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her sonuç öğesine uygulanır (yalnızca `post`/`comment` için) */
+                /** @description Comma-separated field names; applied to each result item (`post`/`comment` only) */
                 fields?: string;
             };
             header?: never;
@@ -4276,7 +4684,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Arama sonuçları, cursor'lu (bkz. üstteki `?type=actor` notu) */
+            /** @description Search results, with a cursor (see the `?type=actor` note above) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4285,7 +4693,7 @@ export interface operations {
                     "application/json": components["schemas"]["ContentSearchResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4294,16 +4702,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4316,9 +4724,9 @@ export interface operations {
     list_tags: {
         parameters: {
             query?: {
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
             };
             header?: never;
@@ -4327,7 +4735,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Etiket listesi, cursor'lu */
+            /** @description Tag list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4336,7 +4744,7 @@ export interface operations {
                     "application/json": components["schemas"]["TagListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4345,16 +4753,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4367,7 +4775,7 @@ export interface operations {
     search_tags: {
         parameters: {
             query?: {
-                /** @description Aranan etiket ön eki */
+                /** @description The tag prefix to search for */
                 q?: string;
             };
             header?: never;
@@ -4376,7 +4784,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Eşleşen etiketler (üst sınır: `actos_core::tag::SEARCH_LIMIT`) */
+            /** @description Matching tags (capped at `actos_core::tag::SEARCH_LIMIT`) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4385,16 +4793,16 @@ export interface operations {
                     "application/json": components["schemas"]["TagSearchResponse"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4407,25 +4815,25 @@ export interface operations {
     list_tag_posts: {
         parameters: {
             query?: {
-                /** @description `new`, `top` ya da `hot` */
+                /** @description `new`, `top`, or `hot` */
                 sort?: string;
-                /** @description Önceki sayfanın `next_cursor`'ı */
+                /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Sayfa başına öğe sayısı */
+                /** @description Items per page */
                 limit?: string;
-                /** @description Virgülle ayrılmış alan adları; her post öğesine uygulanır */
+                /** @description Comma-separated field names; applied to each post item */
                 fields?: string;
             };
             header?: never;
             path: {
-                /** @description Etiket adı */
+                /** @description Tag name */
                 name: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Post listesi, cursor'lu */
+            /** @description Post list, with a cursor */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4434,7 +4842,7 @@ export interface operations {
                     "application/json": components["schemas"]["PostListResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4443,7 +4851,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4452,16 +4860,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4490,7 +4898,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Yükleme kabul edildi, herkese açık URL ile birlikte */
+            /** @description Upload accepted, with its public URL */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -4499,7 +4907,7 @@ export interface operations {
                     "application/json": components["schemas"]["UploadResponse"];
                 };
             };
-            /** @description İstek doğrulamadan geçmedi */
+            /** @description Request failed validation */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4508,7 +4916,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -4517,7 +4925,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Yüklenen dosya kabul edilmedi (tip, boyut veya içerik doğrulaması) */
+            /** @description Uploaded file was rejected (type, size, or content validation) */
             415: {
                 headers: {
                     [name: string]: unknown;
@@ -4526,16 +4934,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4550,21 +4958,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Yüklemenin dış id'si */
+                /** @description The upload's external id */
                 id: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Silindi */
+            /** @description Deleted */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Kimlik bilgisi sunulmadı ya da API key geçersiz */
+            /** @description No credentials were presented, or the API key is invalid */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -4573,7 +4981,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kimlik doğrulandı ama bu eylem için yetki yok */
+            /** @description Authenticated, but not authorized for this action */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4582,7 +4990,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Kaynak bulunamadı */
+            /** @description Resource not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4591,16 +4999,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Hız limiti aşıldı */
+            /** @description Rate limit exceeded */
             429: {
                 headers: {
-                    /** @description Kaç saniye sonra tekrar denenmeli */
+                    /** @description Seconds to wait before retrying */
                     "retry-after"?: number;
-                    /** @description Bu kapsam için pencere başına izin verilen istek sayısı */
+                    /** @description Requests allowed per window for this scope */
                     "x-ratelimit-limit"?: number;
-                    /** @description Pencerede kalan istek hakkı */
+                    /** @description Requests remaining in the current window */
                     "x-ratelimit-remaining"?: number;
-                    /** @description Pencerenin sıfırlanmasına kalan saniye */
+                    /** @description Seconds until the window resets */
                     "x-ratelimit-reset"?: number;
                     [name: string]: unknown;
                 };
@@ -4619,7 +5027,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Sunucu sürümü ve konuşulan API sürümü */
+            /** @description Server version and the API version being spoken */
             200: {
                 headers: {
                     [name: string]: unknown;

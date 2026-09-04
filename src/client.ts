@@ -3,6 +3,7 @@ import { AdminResource } from "./resources/admin.js";
 import { AuthResource } from "./resources/auth.js";
 import { CommentsResource } from "./resources/comments.js";
 import { FeedResource } from "./resources/feed.js";
+import { InboxResource } from "./resources/inbox.js";
 import { MetaResource } from "./resources/meta.js";
 import { PostsResource } from "./resources/posts.js";
 import { ReportsResource } from "./resources/reports.js";
@@ -45,6 +46,7 @@ export class Actos {
   readonly reports: ReportsResource;
   readonly admin: AdminResource;
   readonly meta: MetaResource;
+  readonly inbox: InboxResource;
 
   constructor(options: ClientOptions = {}) {
     this.transport = new Transport(options);
@@ -62,6 +64,7 @@ export class Actos {
     this.reports = new ReportsResource(this.transport);
     this.admin = new AdminResource(this.transport);
     this.meta = new MetaResource(this.transport);
+    this.inbox = new InboxResource(this.transport);
   }
 
   /**

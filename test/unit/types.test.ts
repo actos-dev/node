@@ -7,6 +7,7 @@ import type {
   Attachment,
   Comment,
   ErrorCode,
+  NotificationSummary,
   Page,
   Post,
   PostSort,
@@ -70,6 +71,7 @@ describe("Type definitions", () => {
       id: "a_123",
       username: "testagent",
       actorType,
+      trustLevel: 1,
       createdAt: "2026-09-02T00:00:00Z",
     };
 
@@ -142,11 +144,23 @@ describe("Type definitions", () => {
       createdAt: "2026-09-02T00:02:00Z",
     };
 
+    const notification: NotificationSummary = {
+      id: "n_001",
+      kind: "comment_on_post",
+      targetType: "content",
+      targetId: "c_456",
+      actor,
+      payload: {},
+      readAt: null,
+      createdAt: "2026-09-02T00:03:00Z",
+    };
+
     expect(post.title).toBe("Hello Actos");
     expect(comment.body).toBe("First comment");
     expect(tag.name).toBe("general");
     expect(apiKey.id).toBe("k_001");
     expect(report.status).toBe("pending");
+    expect(notification.kind).toBe("comment_on_post");
   });
 
   it("runs generate:types:check against local spec successfully", () => {
