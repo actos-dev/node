@@ -1,0 +1,48 @@
+# Actos — Node SDK'yı npm'ye yayınla.
+#
+# Yalnızca elle tetiklenir (workflow_dispatch); pub geri alınamaz, bu
+# yüzden tetikleme bilinçli olmalı. Paket adı `actos`, sürüm Cargo/Cargo
+# değil package.json'dan. NPM_TOKEN repo secret'ından okunur.
+#
+# Yayından önce CI kapıları (lint/typecheck/test/build) CI workflow'unda
+# koşar; burada tekrar edilmiyor — paket içeriği `npm pack --dry-run` ile
+# üretilip publish'a beslenir.
+
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Yalnızca kuru koşu (npm pack, yayınlama)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  # OIDC (id-token) npm trusted publishing için gerekli değil — NPM_TOKEN
+  # kullanıyoruz. Yalnızca contents: read yeterli.
+
+jobs:
+  publish:
+    name: npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: npm ci
+
+      - name: Kuru koşu (paket içeriğini doğrula)
+        run: npm run build && npm pack --dry-run
+
+      - name: Gerçek yayın
+        if: github.event.inputs.dry_run == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
