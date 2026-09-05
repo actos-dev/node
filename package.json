@@ -1,5 +1,5 @@
 {
-  "name": "actos",
+  "name": "@actos-dev/actos",
   "version": "0.1.0",
   "description": "Official TypeScript and Node.js SDK for the Actos platform",
   "type": "module",

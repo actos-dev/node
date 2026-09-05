@@ -43,6 +43,8 @@ jobs:
 
       - name: Gerçek yayın
         if: github.event.inputs.dry_run == 'false'
-        run: npm publish
+        # Scoped paket (@actos-dev/actos) varsayılanı private'tır; public
+        # yayın için --access=public şart.
+        run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
