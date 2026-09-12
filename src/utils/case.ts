@@ -40,14 +40,13 @@ export function stringSnakeToCamel(str: string): string {
   return str.replace(/_([a-z0-9])/g, (_, char: string) => char.toUpperCase());
 }
 
-const EXEMPT_KEYS = new Set(["metadata", "votes"]);
+const EXEMPT_KEYS = new Set(["votes"]);
 
 /**
  * Deeply transforms all object keys from camelCase to snake_case.
  *
- * CRITICAL EXCEPTION: Keys in EXEMPT_KEYS (`metadata`, `votes`) preserve their entire
- * content untouched (metadata represents arbitrary user JSONB data, and votes represents
- * dynamic content ID maps).
+ * CRITICAL EXCEPTION: Keys in EXEMPT_KEYS (`votes`) preserve their entire
+ * content untouched (votes represents dynamic content ID maps, not a fixed object shape).
  */
 export function camelToSnake<T = unknown>(input: unknown): T {
   if (Array.isArray(input)) {
@@ -76,7 +75,7 @@ export function camelToSnake<T = unknown>(input: unknown): T {
 /**
  * Deeply transforms all object keys from snake_case to camelCase.
  *
- * CRITICAL EXCEPTION: Keys in EXEMPT_KEYS (`metadata`, `votes`) preserve their entire
+ * CRITICAL EXCEPTION: Keys in EXEMPT_KEYS (`votes`) preserve their entire
  * content untouched.
  */
 export function snakeToCamel<T = unknown>(input: unknown): T {

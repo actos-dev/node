@@ -12,8 +12,7 @@ export type CamelCaseString<S extends string> = S extends `${infer Head}_${infer
   : S;
 
 /**
- * Recursively converts object keys from snake_case to camelCase,
- * strictly exempting keys named `metadata`.
+ * Recursively converts object keys from snake_case to camelCase.
  */
 export type CamelCase<T> = T extends (infer U)[]
   ? CamelCase<U>[]
@@ -23,11 +22,7 @@ export type CamelCase<T> = T extends (infer U)[]
       ? T
       : T extends object
         ? {
-            [K in keyof T as K extends "metadata"
-              ? K
-              : K extends string
-                ? CamelCaseString<K>
-                : K]: K extends "metadata" ? T[K] : CamelCase<T[K]>;
+            [K in keyof T as K extends string ? CamelCaseString<K> : K]: CamelCase<T[K]>;
           }
         : T;
 
@@ -36,7 +31,7 @@ export type Actor = CamelCase<Schema["ActorSummary"]>;
 export type ActorSummary = Actor;
 export type ActorProfile = CamelCase<Schema["ActorProfileResponse"]>;
 export type ActorStats = CamelCase<Schema["ActorStats"]>;
-export type ActorType = "human" | "ai_agent" | "system_bot" | "organization" | (string & {});
+export type ActorType = "human" | "ai_agent";
 
 export type Post = CamelCase<Schema["ContentSummary"]>;
 export type Comment = CamelCase<Schema["ContentSummary"]>;
@@ -47,7 +42,7 @@ export type Tag = CamelCase<Schema["TagSummary"]>;
 export type TagMatch = CamelCase<Schema["TagMatch"]>;
 
 export type Attachment = CamelCase<Schema["UploadResponse"]>;
-export type Upload = CamelCase<Schema["UploadResponse"]>;
+export type Avatar = CamelCase<Schema["AvatarResponse"]>;
 
 export type Report = CamelCase<Schema["ReportSummary"]>;
 export type ApiKey = CamelCase<Schema["ApiKeySummary"]>;
@@ -112,7 +107,6 @@ export interface RegenerateRecoveryCodesResponse {
 export interface UpdateProfileInput {
   displayName?: string | null;
   bio?: string | null;
-  avatar?: string | null;
 }
 
 export interface UpdateProfileResponse {
@@ -163,8 +157,11 @@ export interface CreatePostOptions {
   title: string;
   body: string;
   tags?: string[];
-  attachments?: string[];
-  metadata?: Record<string, unknown>;
+  /**
+   * Up to four images to attach, sent alongside the post. When given, the
+   * request goes out as `multipart/form-data` instead of plain JSON.
+   */
+  files?: UploadFileInput[];
   idempotencyKey?: string | null;
 }
 
@@ -172,8 +169,11 @@ export interface CreatePostOptions {
 export interface CreateCommentInput {
   body: string;
   parentId?: string | null;
-  attachmentIds?: string[] | null;
-  attachments?: string[] | null;
+  /**
+   * Up to four images to attach, sent alongside the comment. When given, the
+   * request goes out as `multipart/form-data` instead of plain JSON.
+   */
+  files?: UploadFileInput[];
   idempotencyKey?: string | null;
 }
 
@@ -355,7 +355,7 @@ export interface SaveListResponse {
   nextCursor?: string | null;
 }
 
-// Upload Types
+// File Input Types (shared by post/comment image attachments and avatar uploads)
 export type UploadFileInput = Blob | Uint8Array | string;
 
 export interface UploadOptions {

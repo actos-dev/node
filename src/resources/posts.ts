@@ -1,5 +1,6 @@
 import type { CreatePostOptions, GetPostOptions, Post, UpdatePostInput } from "../types.js";
-import { stringCamelToSnake } from "../utils/case.js";
+import { camelToSnake, stringCamelToSnake } from "../utils/case.js";
+import { resolveFilePart } from "../utils/file.js";
 import { BaseResource } from "./base.js";
 
 /**
@@ -17,9 +18,12 @@ export class PostsResource extends BaseResource {
    * - To provide your own key (e.g. for safe retries across process restarts), pass a string in `options.idempotencyKey`.
    * - To disable idempotency headers completely, pass `idempotencyKey: null`.
    *
-   * Arbitrary JSON data in `options.metadata` is strictly preserved without case conversion.
+   * **Images (`options.files`)**: when omitted, the request stays plain `application/json`,
+   * exactly as it does without this option. When one or more files are given, the request is
+   * sent instead as `multipart/form-data`, with the JSON body carried in a part named `payload`
+   * and each file appended as a part named `files` (up to four).
    *
-   * @param input - Post contents, tags, attachments, metadata, and optional idempotency key
+   * @param input - Post title, body, tags, optional images, and optional idempotency key
    * @returns The newly created post
    */
   async create(input: CreatePostOptions): Promise<Post> {
@@ -28,13 +32,25 @@ export class PostsResource extends BaseResource {
         ? crypto.randomUUID()
         : (input.idempotencyKey ?? undefined);
 
-    const body = {
+    const payload = {
       title: input.title,
       body: input.body,
       tags: input.tags,
-      attachments: input.attachments,
-      metadata: input.metadata,
     };
+
+    let body: unknown = payload;
+
+    if (input.files && input.files.length > 0) {
+      const formData = new FormData();
+      formData.append("payload", JSON.stringify(camelToSnake(payload)));
+
+      for (const [index, file] of input.files.entries()) {
+        const { blob, filename } = await resolveFilePart(file, undefined, `file-${index}.bin`);
+        formData.append("files", blob, filename);
+      }
+
+      body = formData;
+    }
 
     const res = await this.transport.request<Post>({
       method: "POST",

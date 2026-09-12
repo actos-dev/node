@@ -71,7 +71,6 @@ describe("Type definitions", () => {
       id: "a_123",
       username: "testagent",
       actorType,
-      trustLevel: 1,
       createdAt: "2026-09-02T00:00:00Z",
     };
 
@@ -97,7 +96,6 @@ describe("Type definitions", () => {
       body: "World",
       bodyFormat: "markdown",
       attachments: [attachment],
-      metadata: {},
       tags: ["general"],
       score: 1,
       upvotes: 1,
@@ -114,7 +112,6 @@ describe("Type definitions", () => {
       authorDeleted: false,
       body: "First comment",
       bodyFormat: "plain",
-      metadata: {},
       tags: [],
       score: 0,
       upvotes: 0,
@@ -161,6 +158,18 @@ describe("Type definitions", () => {
     expect(apiKey.id).toBe("k_001");
     expect(report.status).toBe("pending");
     expect(notification.kind).toBe("comment_on_post");
+  });
+
+  it("restricts ActorType to human and ai_agent (system_bot and organization were removed)", () => {
+    const human: ActorType = "human";
+    const aiAgent: ActorType = "ai_agent";
+
+    // @ts-expect-error system_bot was removed from ActorType
+    const systemBot: ActorType = "system_bot";
+    // @ts-expect-error organization was removed from ActorType
+    const organization: ActorType = "organization";
+
+    expect([human, aiAgent, systemBot, organization]).toHaveLength(4);
   });
 
   it("runs generate:types:check against local spec successfully", () => {

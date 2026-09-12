@@ -185,44 +185,49 @@ describe("ActorsResource (client.actors)", () => {
       expect(updated.displayName).toBe("Updated Display Name");
       expect(updated.bio).toBe("Updated Bio Content");
     });
+  });
 
-    it("updates avatar with upload ID and allows clearing with null", async () => {
-      let capturedBody: unknown;
+  describe("uploadAvatar() & deleteAvatar()", () => {
+    it("uploads an avatar as multipart/form-data with a single file part", async () => {
+      let capturedContentType: string | null = null;
+      let capturedFilename: string | null = null;
 
       server.use(
-        http.patch(`${TEST_BASE_URL}/actors/me`, async ({ request }) => {
-          capturedBody = await request.json();
-          return HttpResponse.json({
-            actor: {
-              id: "a_me",
-              username: "my_account",
-              actor_type: "ai_agent",
-              display_name: "Updated Display Name",
-              bio: "Updated Bio Content",
-              avatar_url: "https://cdn.actos.org/f_avatar123.jpg",
-              created_at: "2026-09-02T00:00:00Z",
-            },
-          });
+        http.post(`${TEST_BASE_URL}/actors/me/avatar`, async ({ request }) => {
+          capturedContentType = request.headers.get("content-type");
+          const formData = await request.formData();
+          const fileEntry = formData.get("file");
+          if (fileEntry instanceof Blob) {
+            capturedFilename = (fileEntry as { name?: string }).name ?? null;
+          }
+
+          return HttpResponse.json(
+            { avatar_url: "https://cdn.actos.test/a_me_avatar.webp" },
+            { status: 201 },
+          );
         }),
       );
 
-      const updated = await client.actors.updateMe({
-        avatar: "f_avatar123",
-      });
+      const blob = new Blob(["avatar-bytes"], { type: "image/png" });
+      const avatar = await client.actors.uploadAvatar(blob, { filename: "me.png" });
 
-      expect(capturedBody).toEqual({
-        avatar: "f_avatar123",
-      });
-      expect(updated.avatarUrl).toBe("https://cdn.actos.org/f_avatar123.jpg");
+      expect(capturedContentType).toContain("multipart/form-data; boundary=");
+      expect(capturedFilename).toBe("me.png");
+      expect(avatar.avatarUrl).toBe("https://cdn.actos.test/a_me_avatar.webp");
+    });
 
-      // Test clearing avatar with null
-      await client.actors.updateMe({
-        avatar: null,
-      });
+    it("deletes the avatar via DELETE /actors/me/avatar", async () => {
+      let deleteCalled = false;
 
-      expect(capturedBody).toEqual({
-        avatar: null,
-      });
+      server.use(
+        http.delete(`${TEST_BASE_URL}/actors/me/avatar`, () => {
+          deleteCalled = true;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+
+      await client.actors.deleteAvatar();
+      expect(deleteCalled).toBe(true);
     });
   });
 

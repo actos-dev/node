@@ -156,16 +156,15 @@ describe("PostsResource (client.posts)", () => {
       expect(capturedIdempotencyKey).toBeNull();
     });
 
-    it("strictly preserves arbitrary metadata keys without case conversion (§2.10)", async () => {
-      let capturedMetadata: unknown;
+    it("sends plain application/json when no files are given", async () => {
+      let capturedContentType: string | null = null;
 
       server.use(
         http.post(`${TEST_BASE_URL}/posts`, async ({ request }) => {
-          const body = (await request.json()) as Record<string, unknown>;
-          capturedMetadata = body.metadata;
+          capturedContentType = request.headers.get("content-type");
           return HttpResponse.json(
             {
-              id: "c_meta_post",
+              id: "c_json_post",
               title: "Title",
               content_type: "post",
               body: "Body",
@@ -177,7 +176,6 @@ describe("PostsResource (client.posts)", () => {
               comment_count: 0,
               created_at: "2026-09-02T00:00:00Z",
               deleted: false,
-              metadata: body.metadata,
               author: {
                 id: "a_author",
                 username: "author",
@@ -190,22 +188,77 @@ describe("PostsResource (client.posts)", () => {
         }),
       );
 
-      const customMetadata = {
-        model_name: "claude-3-5-sonnet",
-        camelCaseOption: true,
-        nested_params: {
-          subKey_one: 42,
-        },
-      };
+      await client.posts.create({ title: "Title", body: "Body" });
 
-      const res = await client.posts.create({
-        title: "Post with metadata",
-        body: "Contents",
-        metadata: customMetadata,
+      expect(capturedContentType).toContain("application/json");
+    });
+
+    it("sends multipart/form-data with a payload part and file parts when files are given", async () => {
+      let capturedContentType: string | null = null;
+      let capturedPayload: Record<string, unknown> | undefined;
+      let capturedFileCount = 0;
+
+      server.use(
+        http.post(`${TEST_BASE_URL}/posts`, async ({ request }) => {
+          capturedContentType = request.headers.get("content-type");
+          const formData = await request.formData();
+
+          const payloadEntry = formData.get("payload");
+          if (typeof payloadEntry === "string") {
+            capturedPayload = JSON.parse(payloadEntry);
+          }
+          capturedFileCount = formData.getAll("files").length;
+
+          return HttpResponse.json(
+            {
+              id: "c_multipart_post",
+              title: "With images",
+              content_type: "post",
+              body: "See attached",
+              body_format: "markdown",
+              author_deleted: false,
+              score: 0,
+              upvotes: 0,
+              downvotes: 0,
+              comment_count: 0,
+              created_at: "2026-09-02T00:00:00Z",
+              deleted: false,
+              attachments: [
+                {
+                  id: "u_1",
+                  url: "https://cdn.actos.test/u_1.webp",
+                  thumbnail_url: "https://cdn.actos.test/u_1_thumb.webp",
+                  mime_type: "image/webp",
+                  byte_size: 1024,
+                  checksum_sha256: "sha256...",
+                  created_at: "2026-09-02T00:00:00Z",
+                  width: 100,
+                  height: 100,
+                },
+              ],
+              author: {
+                id: "a_author",
+                username: "author",
+                actor_type: "human",
+                created_at: "...",
+              },
+            },
+            { status: 201 },
+          );
+        }),
+      );
+
+      const post = await client.posts.create({
+        title: "With images",
+        body: "See attached",
+        files: [new Blob(["image-bytes"], { type: "image/png" })],
       });
 
-      expect(capturedMetadata).toEqual(customMetadata);
-      expect(res.metadata).toEqual(customMetadata);
+      expect(capturedContentType).toContain("multipart/form-data; boundary=");
+      expect(capturedPayload).toEqual({ title: "With images", body: "See attached" });
+      expect(capturedFileCount).toBe(1);
+      expect(post.attachments).toHaveLength(1);
+      expect(post.attachments?.[0]?.id).toBe("u_1");
     });
 
     it("retries on 5xx by default because an Idempotency-Key is automatically generated (§2.6, §2.9)", async () => {

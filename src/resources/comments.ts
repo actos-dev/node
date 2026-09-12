@@ -8,6 +8,8 @@ import type {
   ListCommentsParams,
   UpdateCommentInput,
 } from "../types.js";
+import { camelToSnake } from "../utils/case.js";
+import { resolveFilePart } from "../utils/file.js";
 import { BaseResource } from "./base.js";
 
 /**
@@ -19,16 +21,35 @@ export class CommentsResource extends BaseResource {
    * Post a new comment or reply to an existing comment.
    * Requires authentication `[A]`.
    *
+   * @remarks
+   * **Images (`input.files`)**: when omitted, the request stays plain `application/json`,
+   * exactly as it does without this option. When one or more files are given, the request is
+   * sent instead as `multipart/form-data`, with the JSON body carried in a part named `payload`
+   * and each file appended as a part named `files` (up to four).
+   *
    * @param postId - ID of the post being commented on (`c_...`)
-   * @param input - Comment body, optional parentId, and attachments
+   * @param input - Comment body, optional parentId, and optional images
    * @returns The created comment
    */
   async create(postId: string, input: CreateCommentInput): Promise<Comment> {
-    const body = {
+    const payload = {
       body: input.body,
       parentId: input.parentId,
-      attachmentIds: input.attachmentIds ?? input.attachments,
     };
+
+    let body: unknown = payload;
+
+    if (input.files && input.files.length > 0) {
+      const formData = new FormData();
+      formData.append("payload", JSON.stringify(camelToSnake(payload)));
+
+      for (const [index, file] of input.files.entries()) {
+        const { blob, filename } = await resolveFilePart(file, undefined, `file-${index}.bin`);
+        formData.append("files", blob, filename);
+      }
+
+      body = formData;
+    }
 
     const res = await this.transport.request<Comment>({
       method: "POST",

@@ -296,7 +296,7 @@ describe("Transport Layer", () => {
     ).rejects.toThrow();
   });
 
-  it("converts outgoing camelCase to snake_case and incoming snake_case to camelCase with metadata exempted", async () => {
+  it("converts outgoing camelCase to snake_case and incoming snake_case to camelCase for nested payloads", async () => {
     let receivedPayload: unknown;
 
     server.use(
@@ -306,9 +306,8 @@ describe("Transport Layer", () => {
           author_username: "agent_smith",
           post_count: 5,
           created_at: "2026-09-02T00:00:00Z",
-          metadata: {
-            preserved_key: 1,
-            anotherCamelKey: "untouched",
+          nested_stats: {
+            follower_count: 3,
           },
         });
       }),
@@ -320,9 +319,8 @@ describe("Transport Layer", () => {
       authorUsername: string;
       postCount: number;
       createdAt: string;
-      metadata: {
-        preserved_key: number;
-        anotherCamelKey: string;
+      nestedStats: {
+        followerCount: number;
       };
     }>({
       method: "POST",
@@ -330,31 +328,28 @@ describe("Transport Layer", () => {
       body: {
         authorUsername: "agent_smith",
         displayName: "Smith",
-        metadata: {
-          clientCustomKey: "preserved",
-          snake_case_key: 999,
+        nestedStats: {
+          followerCount: 3,
         },
       },
     });
 
-    // Request payload had keys converted to snake_case except metadata
+    // Request payload had all keys converted to snake_case
     expect(receivedPayload).toEqual({
       author_username: "agent_smith",
       display_name: "Smith",
-      metadata: {
-        clientCustomKey: "preserved",
-        snake_case_key: 999,
+      nested_stats: {
+        follower_count: 3,
       },
     });
 
-    // Response payload had keys converted to camelCase except metadata
+    // Response payload had all keys converted to camelCase
     expect(res.data).toEqual({
       authorUsername: "agent_smith",
       postCount: 5,
       createdAt: "2026-09-02T00:00:00Z",
-      metadata: {
-        preserved_key: 1,
-        anotherCamelKey: "untouched",
+      nestedStats: {
+        followerCount: 3,
       },
     });
   });

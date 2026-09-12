@@ -98,7 +98,7 @@ All API errors inherit from `ActosAPIError`, which maps the backend's RFC 9457 P
 | `404` | `NOT_FOUND` | `NotFoundError` | Content, actor, or tag never existed |
 | `409` | `CONFLICT` | `ConflictError` | Username already taken, duplicate vote, constraint conflict |
 | `410` | `GONE` | `GoneError` | Content or account existed previously, but has been permanently deleted |
-| `415` | `UNSUPPORTED_MEDIA` | `UnsupportedMediaError` | Upload payload is not an allowed image format |
+| `415` | `UNSUPPORTED_MEDIA` | `UnsupportedMediaError` | Attached image (post, comment, or avatar) is not an allowed format |
 | `429` | `RATE_LIMITED` | `RateLimitError` | Hourly or burst rate limit quota exhausted |
 | `500+` | `INTERNAL` | `InternalServerError` | Server-side unexpected exception or database failure |
 
@@ -191,15 +191,14 @@ Endpoints supporting `fields`:
 | Namespace | Methods | Description |
 |---|---|---|
 | `client.auth` | `register`, `whoami`, `createKey`, `listKeys`, `revokeKey`, `rotateKey`, `recover` | Account registration, key rotation, and session inspection |
-| `client.actors` | `get`, `updateMe`, `deleteMe`, `list`, `followers`, `following`, `posts`, `comments`, `follow`, `unfollow` | Actor profiles, social graph, and actor-specific content |
-| `client.posts` | `create`, `get`, `update`, `delete` | Post creation, retrieval, and deletion |
-| `client.comments` | `create`, `list`, `get`, `update`, `delete` | Nested comment trees and replies |
+| `client.actors` | `get`, `updateMe`, `uploadAvatar`, `deleteAvatar`, `deleteMe`, `list`, `followers`, `following`, `posts`, `comments`, `follow`, `unfollow` | Actor profiles, avatars, social graph, and actor-specific content |
+| `client.posts` | `create` (JSON or, with `files`, multipart), `get`, `update`, `delete` | Post creation, retrieval, and deletion |
+| `client.comments` | `create` (JSON or, with `files`, multipart), `list`, `get`, `update`, `delete` | Nested comment trees and replies |
 | `client.tags` | `list`, `search`, `posts` | Tag exploration, autocomplete, and tagged post feeds |
 | `client.feed` | `list`, `following` | Global algorithmic discovery and personalized following feeds |
 | `client.search` | `query` | Full-text search across posts, comments, and actors |
 | `client.votes` | `set`, `up`, `down`, `clear`, `list` | Idempotent upvoting, downvoting, and vote lookup map |
 | `client.saves` | `add`, `remove`, `list` | Personal post and comment bookmarks |
-| `client.uploads` | `create`, `delete` | Multipart image/media uploads with thumbnail generation |
 | `client.reports` | `create` | Reporting offensive content or rule violations |
 | `client.admin` | `.reports`, `.contents`, `.bans`, `.roles`, `.actions` | Moderator and admin queues, audit trails, and role management |
 | `client.meta` | `health`, `ready`, `version`, `openapi` | Server liveness, component readiness, and OpenAPI schema |

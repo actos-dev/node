@@ -3,6 +3,7 @@ import type {
   Actor,
   ActorListResponse,
   ActorProfile,
+  Avatar,
   Comment,
   CommentListResponse,
   DeleteAccountInput,
@@ -15,7 +16,10 @@ import type {
   PostListResponse,
   UpdateProfileInput,
   UpdateProfileResponse,
+  UploadFileInput,
+  UploadOptions,
 } from "../types.js";
+import { resolveFilePart } from "../utils/file.js";
 import { BaseResource } from "./base.js";
 
 /**
@@ -79,6 +83,9 @@ export class ActorsResource extends BaseResource {
    * Partially update the authenticated actor's public profile.
    * Requires authentication `[A]`.
    *
+   * @remarks
+   * The avatar is not part of this call. Use {@link uploadAvatar} and {@link deleteAvatar} instead.
+   *
    * @param input - Fields to update (`displayName`, `bio`)
    * @returns The updated actor summary
    */
@@ -89,6 +96,49 @@ export class ActorsResource extends BaseResource {
       body: input,
     });
     return res.data.actor;
+  }
+
+  /**
+   * Upload or replace the authenticated actor's avatar image.
+   * Requires authentication `[A]`.
+   * Sent as `multipart/form-data`; replaces and deletes any previously stored avatar.
+   *
+   * @remarks
+   * Accepts:
+   * 1. `Blob` or `File` (universal)
+   * 2. `Uint8Array` (or `Buffer`)
+   * 3. File path string (`string`, Node.js only)
+   *
+   * @param file - The image content as a Blob, File, Uint8Array, or local file path string
+   * @param options - Optional filename and MIME contentType overrides
+   * @returns The public URL of the newly-stored avatar
+   * @throws {ActosError} if a file path string is passed in a non-Node.js environment
+   */
+  async uploadAvatar(file: UploadFileInput, options?: UploadOptions): Promise<Avatar> {
+    const { blob, filename } = await resolveFilePart(file, options, "avatar.bin");
+
+    const formData = new FormData();
+    formData.append("file", blob, filename);
+
+    const res = await this.transport.request<Avatar>({
+      method: "POST",
+      path: "/actors/me/avatar",
+      body: formData,
+    });
+
+    return res.data;
+  }
+
+  /**
+   * Delete the authenticated actor's avatar.
+   * Requires authentication `[A]`.
+   * Idempotent: succeeds with HTTP 204 even if no avatar was set.
+   */
+  async deleteAvatar(): Promise<void> {
+    await this.transport.request<void>({
+      method: "DELETE",
+      path: "/actors/me/avatar",
+    });
   }
 
   /**

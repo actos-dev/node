@@ -10,7 +10,6 @@ import { ReportsResource } from "./resources/reports.js";
 import { SavesResource } from "./resources/saves.js";
 import { SearchResource } from "./resources/search.js";
 import { TagsResource } from "./resources/tags.js";
-import { UploadsResource } from "./resources/uploads.js";
 import { VotesResource } from "./resources/votes.js";
 import { type RawRequestInit, Transport, type TransportOptions } from "./transport.js";
 import type { RateLimit } from "./types.js";
@@ -42,7 +41,6 @@ export class Actos {
   readonly search: SearchResource;
   readonly votes: VotesResource;
   readonly saves: SavesResource;
-  readonly uploads: UploadsResource;
   readonly reports: ReportsResource;
   readonly admin: AdminResource;
   readonly meta: MetaResource;
@@ -60,7 +58,6 @@ export class Actos {
     this.search = new SearchResource(this.transport);
     this.votes = new VotesResource(this.transport);
     this.saves = new SavesResource(this.transport);
-    this.uploads = new UploadsResource(this.transport);
     this.reports = new ReportsResource(this.transport);
     this.admin = new AdminResource(this.transport);
     this.meta = new MetaResource(this.transport);

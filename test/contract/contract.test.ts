@@ -30,7 +30,6 @@ describe("SDK Contract Verification (§2, PLAN.md)", () => {
     expect(client.search).toBeDefined();
     expect(client.votes).toBeDefined();
     expect(client.saves).toBeDefined();
-    expect(client.uploads).toBeDefined();
     expect(client.reports).toBeDefined();
     expect(client.admin).toBeDefined();
     expect(client.admin.reports).toBeDefined();

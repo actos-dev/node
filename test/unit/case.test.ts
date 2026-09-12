@@ -74,43 +74,6 @@ describe("Case conversion utilities", () => {
       const date = new Date();
       expect(camelToSnake(date)).toBe(date);
     });
-
-    it("EXEMPTS metadata content completely from transformation", () => {
-      const input = {
-        title: "Test Post",
-        authorName: "John",
-        metadata: {
-          custom_CamelKey: "value1",
-          nestedData: {
-            deep_Key: 123,
-            anotherValue: true,
-          },
-          arrayValue: [{ inner_Field: "test" }],
-        },
-      };
-
-      const result = camelToSnake<{
-        title: string;
-        author_name: string;
-        metadata: {
-          custom_CamelKey: string;
-          nestedData: { deep_Key: number; anotherValue: boolean };
-          arrayValue: Array<{ inner_Field: string }>;
-        };
-      }>(input);
-
-      expect(result.title).toBe("Test Post");
-      expect(result.author_name).toBe("John");
-      // metadata contents must NOT be converted
-      expect(result.metadata).toEqual({
-        custom_CamelKey: "value1",
-        nestedData: {
-          deep_Key: 123,
-          anotherValue: true,
-        },
-        arrayValue: [{ inner_Field: "test" }],
-      });
-    });
   });
 
   describe("snakeToCamel deep conversion", () => {
@@ -155,43 +118,6 @@ describe("Case conversion utilities", () => {
       expect(snakeToCamel(123)).toBe(123);
       expect(snakeToCamel(null)).toBeNull();
       expect(snakeToCamel(undefined)).toBeUndefined();
-    });
-
-    it("EXEMPTS metadata content completely from transformation", () => {
-      const input = {
-        title: "Test Post",
-        author_name: "John",
-        metadata: {
-          custom_snake_key: "value1",
-          nested_data: {
-            deep_key: 123,
-            another_value: true,
-          },
-          array_value: [{ inner_field: "test" }],
-        },
-      };
-
-      const result = snakeToCamel<{
-        title: string;
-        authorName: string;
-        metadata: {
-          custom_snake_key: string;
-          nested_data: { deep_key: number; another_value: boolean };
-          array_value: Array<{ inner_field: string }>;
-        };
-      }>(input);
-
-      expect(result.title).toBe("Test Post");
-      expect(result.authorName).toBe("John");
-      // metadata contents must NOT be converted to camelCase
-      expect(result.metadata).toEqual({
-        custom_snake_key: "value1",
-        nested_data: {
-          deep_key: 123,
-          another_value: true,
-        },
-        array_value: [{ inner_field: "test" }],
-      });
     });
   });
 });

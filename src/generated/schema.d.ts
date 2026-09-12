@@ -44,9 +44,30 @@ export interface paths {
         head?: never;
         /**
          * Partially update your own profile
-         * @description A field that is absent from the JSON is left untouched; sending `null` clears it; sending a value updates it (see `actos_types::actor::UpdateProfileRequest`). The id given for `avatar` must be an upload id returned by `POST /uploads`; `403` if it belongs to someone else, `404` if it doesn't exist, `409` if it's already attached to a piece of content.
+         * @description A field that is absent from the JSON is left untouched; sending `null` clears it; sending a value updates it. To change the avatar, use `POST`/`DELETE /actors/me/avatar` instead.
          */
         patch: operations["update_profile"];
+        trace?: never;
+    };
+    "/actors/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload or replace your own avatar
+         * @description Expects a `file` field in the multipart body. Replaces and deletes any previously stored avatar.
+         */
+        post: operations["upload_avatar"];
+        /** Delete your own avatar */
+        delete: operations["delete_avatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/actors/{username}": {
@@ -331,11 +352,11 @@ export interface paths {
         post?: never;
         /**
          * Revoke an API key
-         * @description `key_id` ham UUID string'i olarak ayrıştırılır (base62 değil — zaten
-         *     rastgele bir UUID, numaralandırma riski yok). Ayrıştırılamıyorsa
-         *     [`Error::NotFound`] dönülür, [`Error::Validation`] değil: "bu biçim
-         *     geçerli ama böyle bir key yok" ile "biçim bozuk" ayrımı saldırgana bilgi
-         *     verirdi.
+         * @description `key_id` is parsed as a raw UUID string (not base62 — it is a random UUID
+         *     already, so there is no enumeration risk). If it cannot be parsed, a
+         *     not-found error is returned rather than a validation error: distinguishing
+         *     "the format is valid but no such key exists" from "the format is
+         *     malformed" would leak information to an attacker.
          */
         delete: operations["revoke_key"];
         options?: never;
@@ -592,7 +613,7 @@ export interface paths {
         };
         /**
          * List your inbox (notifications)
-         * @description Newest first, keyset-cursor paginated (see `actos_core::cursor` — no new pagination scheme was invented). `?unread=true` returns unread notifications only. `unread_count` is always the TOTAL unread count, not the number of items on this page.
+         * @description Newest first, keyset-cursor paginated (the same scheme as everywhere else — no new scheme was invented). `?unread=true` returns unread notifications only. `unread_count` is always the TOTAL unread count, not the number of items on this page.
          */
         get: operations["get_inbox"];
         put?: never;
@@ -694,7 +715,7 @@ export interface paths {
         put?: never;
         /**
          * Create a new post
-         * @description If the `Idempotency-Key` header is given and a request with the same actor + same key has already completed, the **same** response is returned as-is without creating a new post.
+         * @description If the `Idempotency-Key` header is given and a request with the same actor + same key has already completed, the **same** response is returned as-is without creating a new post. Accepts EITHER `application/json` (no images) OR `multipart/form-data` (the same JSON as a `payload` part, plus up to 4 `files` parts).
          */
         post: operations["create_post"];
         delete?: never;
@@ -740,7 +761,7 @@ export interface paths {
         put?: never;
         /**
          * Add a comment to a post (or to another comment)
-         * @description If `parent_id` is omitted, the comment becomes a direct child of the post; if given, it replies to that comment.
+         * @description If `parent_id` is omitted, the comment becomes a direct child of the post; if given, it replies to that comment. Accepts EITHER `application/json` (no images) OR `multipart/form-data` (the same JSON as a `payload` part, plus up to 4 `files` parts).
          */
         post: operations["create_comment"];
         delete?: never;
@@ -778,7 +799,7 @@ export interface paths {
         };
         /**
          * Search content or actors
-         * @description `type` is required: `post`, `comment`, or `actor`. `?type=post`/`?type=comment` return the `ContentSearchResponse` shape (documented below); `?type=actor` returns the same envelope (`{"results": [...], "next_cursor": ...}`) but the items inside `results` are `ActorSummary` — see `actos_types::search::ActorSearchResponse`. If `q` is omitted, an empty result list is returned, not an error.
+         * @description `type` is required: `post`, `comment`, or `actor`. `?type=post`/`?type=comment` return the `ContentSearchResponse` shape (documented below); `?type=actor` returns the same envelope (`{"results": [...], "next_cursor": ...}`) but the items inside `results` are `ActorSummary` objects. If `q` is omitted, an empty result list is returned, not an error.
          */
         get: operations["search"];
         put?: never;
@@ -798,9 +819,8 @@ export interface paths {
         };
         /**
          * List tags ordered by popularity
-         * @description Popülerlik cursor'ı [`actos_core::cursor::SortKey::Top`] üzerinden
-         *     taşınıyor — orada "skor" olarak adlandırılan sayı burada post sayısı
-         *     (bkz. `actos_core::tag::list_popular`).
+         * @description The popularity cursor rides on the shared "top" sort key — the number
+         *     called "score" there is the post count here.
          */
         get: operations["list_tags"];
         put?: never;
@@ -851,43 +871,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/uploads": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Upload a file
-         * @description Expects a `file` field in the multipart body. The response's `id` is passed to `POST /posts`/`POST /posts/{id}/comments`'s `attachment_ids` field.
-         */
-        post: operations["create_upload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/uploads/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete an upload */
-        delete: operations["delete_upload"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/version": {
         parameters: {
             query?: never;
@@ -910,25 +893,25 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
-         * @description Actor listeleyen uçların (`followers`, `following`, keşif dizini) ortak
-         *     yanıt biçimi: bir sayfa actor + varsa sonraki sayfanın cursor'ı.
+         * @description The shared response shape of the actor-listing endpoints (`followers`,
+         *     `following`, the discovery directory): one page of actors plus the cursor
+         *     for the next page, if any.
          */
         ActorListResponse: {
             actors: components["schemas"]["ActorSummary"][];
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
         };
-        /** @description `GET /actors/{username}` yanıt gövdesi. */
+        /** @description Response body of `GET /actors/{username}`. */
         ActorProfileResponse: {
             actor: components["schemas"]["ActorSummary"];
             stats: components["schemas"]["ActorStats"];
         };
         /**
-         * @description `GET /actors/{username}` yanıtındaki istatistik bloğu.
+         * @description The statistics block in the `GET /actors/{username}` response.
          *
-         *     `contents` tablosundan (yalnızca canlı — `deleted_at IS NULL` — satırlar
-         *     üzerinden) tek bir agrega sorguyla hesaplanır; actor başına ayrı bir
-         *     sorgu atılmaz (bkz. `actos_core::actor::get_profile`).
+         *     Computed with a single aggregate query over the contents table (live rows
+         *     only), not with one query per actor.
          */
         ActorStats: {
             /** Format: int64 */
@@ -939,35 +922,29 @@ export interface components {
             total_score: number;
         };
         /**
-         * @description Bir actor'ün dışa dönük özeti.
+         * @description The outward-facing summary of an actor.
          *
-         *     `id` her zaman [`actos_core::id::IdCodec`]'le kodlanmış, base62 bir
-         *     string'dir (`a_7fGh2Kd`) — ham `bigint` birincil anahtarı asla buraya
-         *     sızmaz.
+         *     `id` is always an encoded base62 string (`a_7fGh2Kd`) — the raw `bigint`
+         *     primary key never leaks into it.
          */
         ActorSummary: {
             actor_type: string;
             /**
-             * @description Avatarın herkese açık URL'i — `actors.avatar_object_key` set
-             *     değilse (hiç avatar seçilmemişse) `None`. Bucket public-read olduğu
-             *     için (bkz. `crate::upload::UploadResponse.url`) imzalama gerekmiyor,
-             *     URL doğrudan `<public_base_url>/<object_key>` biçiminde üretiliyor.
+             * @description Public URL of the avatar — `None` when no avatar has been chosen.
+             *     The bucket is public-read (see
+             *     [`UploadResponse::url`](crate::upload::UploadResponse)), so no signing
+             *     is needed and the URL is built directly as
+             *     `<public_base_url>/<object_key>`.
              *
-             *     **Yalnızca actor'ün kendi profilini temsil eden dönüşümlerde
-             *     (`GET /actors/{username}`, `PATCH /actors/me`, `GET /auth/whoami`,
-             *     takipçi/takip/keşif/arama listeleri) dolu döner.** Bir içeriğin
-             *     (post/yorum) yazarını özetleyen `ActorSummary`'lerde (bkz.
-             *     `actos-api/src/routes/posts.rs`) her zaman `None`'dur — o yol
-             *     `Content.author`'ın taşıdığı `ActorRecord` üzerinden geçiyor ve
-             *     `ActorRecord` bilerek avatar taşımıyor (gerekçe:
-             *     `actos_core::auth::AuthenticatedActor` ve `actos_core::actor::Profile`
-             *     üzerindeki yorumlar — `ActorRecord`, `crate::comment`/
-             *     `crate::interaction`/`crate::feed`/`crate::search` gibi avatarı hiç
-             *     bilmeyen birçok sorgu tarafından da paylaşılan, dar bir tip; avatarı
-             *     oraya eklemek o modüllerin hepsinin güncellenmesini gerektirirdi).
-             *     Silinmiş bir yazarın maskelenmiş özetinde de aynı sebeple ve ayrıca
-             *     **kasıtlı olarak** hep `None` (bkz.
-             *     `actos-api/src/routes/posts.rs::masked_actor_summary`).
+             *     **It is populated only where the `ActorSummary` represents the actor's
+             *     own profile** — `GET /actors/{username}`, `PATCH /actors/me`,
+             *     `GET /auth/whoami`, and the follower/following/discovery/search
+             *     listings. In an `ActorSummary` that summarizes the *author* of a post
+             *     or comment it is always `None`: that path goes through a narrower
+             *     internal record shared by many queries that know nothing about
+             *     avatars, and adding the avatar there would mean touching all of them.
+             *     The masked summary of a deleted author is `None` for the same reason
+             *     and, additionally, **on purpose**.
              */
             avatar_url?: string | null;
             bio?: string | null;
@@ -975,26 +952,21 @@ export interface components {
             created_at: string;
             display_name?: string | null;
             id: string;
-            /**
-             * Format: int32
-             * @description Güven kademesi (0-2) — bkz. `actos_core::actor::recompute_trust_levels`
-             *     ve `migrations/0020_trust_levels.up.sql`. Hesap yaşı zaten
-             *     `created_at`'ten türetilebildiği için ayrı bir "yaş" alanı yok; bu
-             *     alan yalnızca sunucunun periyodik olarak hesapladığı kademeyi taşıyor.
-             */
-            trust_level: number;
             username: string;
         };
-        /** @description `GET /admin/actions` yanıtı. */
+        /** @description Response of `GET /admin/actions`. */
         AdminActionListResponse: {
             actions: components["schemas"]["AdminActionSummary"][];
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
         };
-        /** @description Bir denetim izi kaydı. */
+        /** @description An audit trail record. */
         AdminActionSummary: {
             action_type: string;
-            /** @description Eylemi yapan admin'in kullanıcı adı — ham id yerine okunabilir olan. */
+            /**
+             * @description Username of the admin who performed the action — readable, rather
+             *     than a raw id.
+             */
             admin_username: string;
             /** @description RFC 3339. */
             created_at: string;
@@ -1005,15 +977,15 @@ export interface components {
             target_type: string;
         };
         /**
-         * @description Bir API key'in dışa dönük özeti. Secret'in kendisi ya da hash'i **asla**
-         *     bu tipte yer almaz.
+         * @description The outward-facing summary of an API key. Neither the secret itself nor
+         *     its hash **ever** appears in this type.
          */
         ApiKeySummary: {
             /** @description RFC 3339. */
             created_at: string;
             /**
-             * @description Ham UUID string'i (`api_keys.id`) — base62 kodlanmış değil. Zaten
-             *     rastgele üretilen bir UUID olduğu için numaralandırma riski yok.
+             * @description The raw UUID string — not base62-encoded. It is a randomly generated
+             *     UUID already, so there is no enumeration risk.
              */
             id: string;
             label?: string | null;
@@ -1022,11 +994,27 @@ export interface components {
             /** @description RFC 3339. */
             revoked_at?: string | null;
         };
-        /** @description Bir ban kaydı. */
+        /**
+         * @description Response body of `POST /actors/me/avatar`.
+         *
+         *     Just the URL, not a full `ActorSummary`: the caller already has the rest
+         *     of their own profile (this endpoint only ever changes one field), and
+         *     making a second round trip through `crate::auth::ActorSummary` to report
+         *     back fields the caller didn't just send would be pure overhead.
+         */
+        AvatarResponse: {
+            /**
+             * @description The public URL of the newly-stored avatar. Directly usable — see
+             *     [`crate::upload::UploadResponse::url`] for why (same public-read
+             *     bucket, no signing).
+             */
+            avatar_url: string;
+        };
+        /** @description A ban record. */
         BanSummary: {
             /** @description RFC 3339. */
             banned_at: string;
-            /** @description RFC 3339. `None` ise kalıcı. */
+            /** @description RFC 3339. `None` means permanent. */
             expires_at?: string | null;
             reason: string;
             username: string;
@@ -1040,377 +1028,370 @@ export interface components {
             status: "down";
         };
         /**
-         * @description `GET /comments/{id}` yanıtı: yorum + kökten kendisine kadar ata zinciri.
+         * @description Response of `GET /comments/{id}`: the comment plus its ancestor chain
+         *     from the root down to it.
          *
-         *     `ancestors` kökten başlar (ilk öğe her zaman post'tur) ve yorumun
-         *     kendisini **içermez** — bir breadcrumb'ın doğal sırası bu.
+         *     `ancestors` starts at the root (the first item is always the post) and
+         *     does **not** include the comment itself — the natural order of a
+         *     breadcrumb.
          */
         CommentDetailResponse: {
             ancestors: components["schemas"]["ContentSummary"][];
             comment: components["schemas"]["ContentSummary"];
         };
-        /** @description `GET /actors/{username}/comments` yanıtı (Faz 7'den devir). */
+        /** @description Response of `GET /actors/{username}/comments`. */
         CommentListResponse: {
             comments: components["schemas"]["ContentSummary"][];
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
         };
         /**
-         * @description Bir yorum ağacındaki tek düğüm: içeriğin kendisi + doğrudan yanıtları.
+         * @description A single node in a comment tree: the content itself plus its direct
+         *     replies.
          *
-         *     [`ContentSummary`] alanları `flatten` ile düğümün kendisine açılıyor,
-         *     ayrı bir `content` sarmalayıcısı yok: istemci (özellikle bir ajan) bir
-         *     yorumu okurken `node.body` yazabilmeli, `node.content.body` değil.
-         *     `replies` bu düz alanların yanına eklenen tek fazladan anahtar.
+         *     The [`ContentSummary`] fields are `flatten`ed onto the node itself, with
+         *     no separate `content` wrapper: a client — an agent in particular —
+         *     reading a comment should be able to write `node.body`, not
+         *     `node.content.body`. `replies` is the one extra key added beside those
+         *     flat fields.
          *
-         *     **Boş `replies` yine de gönderiliyor** (atlanmıyor): bir ajanın
-         *     "yanıtlar alanı yok mu, yoksa boş mu" ayrımını yapmak zorunda kalmaması
-         *     için — her düğümde aynı şekil.
+         *     **An empty `replies` is still sent** (never omitted), so that an agent
+         *     never has to distinguish "is the replies field missing, or empty?" —
+         *     every node has the same shape.
          */
         CommentNodeResponse: components["schemas"]["ContentSummary"] & {
             /**
-             * @description `Vec<CommentNodeResponse>` — kendi tipine dönen bir döngü. utoipa'nın
-             *     `ToSchema` türetmesi bunu `no_recursion` işaretlenmeden bırakırsa
-             *     şema toplama fonksiyonu (`schemas()`) sonsuz döngüye girip **yığın
-             *     taşmasıyla çöküyor** (ölçüldü: `cargo test` bu alan işaretsizken
-             *     `has overflowed its stack` ile abort ediyordu — bkz. utoipa'nın kendi
-             *     dokümanı, `#[schema(no_recursion)]` "Pet -> Owner -> Pet" örneği).
-             *     `$ref` ile bir kere referans verip döngüyü burada kesiyoruz.
+             * @description `Vec<CommentNodeResponse>` — a cycle back into its own type. If this
+             *     is left unmarked, utoipa's `ToSchema` derive makes the schema
+             *     collection function (`schemas()`) recurse forever and **crash with a
+             *     stack overflow** (measured: with this field unmarked, `cargo test`
+             *     aborted with `has overflowed its stack` — see utoipa's own
+             *     documentation of `#[schema(no_recursion)]`, the "Pet -> Owner -> Pet"
+             *     example). We reference it once via `$ref` and cut the cycle here.
              */
             replies: components["schemas"]["CommentNodeResponse"][];
         };
         /**
-         * @description `GET /posts/{id}/comments` yanıtı.
+         * @description Response of `GET /posts/{id}/comments`.
          *
-         *     `next_cursor` **yalnızca üst seviye yorumları** sayfalar; iç içe
-         *     yanıtlar sayfalanmaz (bkz. `actos_core::comment::list_comment_tree`).
-         *     Daha derin bir alt ağaç `?parent=<id>` ile ayrıca çekilir.
+         *     `next_cursor` paginates **top-level comments only**; nested replies are
+         *     not paginated. A deeper subtree is fetched separately with
+         *     `?parent=<id>`.
          */
         CommentThreadResponse: {
             comments: components["schemas"]["CommentNodeResponse"][];
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
         };
-        /** @description `GET /search?type=post` / `?type=comment` yanıtı. */
+        /** @description Response of `GET /search?type=post` / `?type=comment`. */
         ContentSearchResponse: {
             /**
-             * @description `None` ise bu son sayfadır. **Yalnızca aynı `q` ile** sonraki
-             *     sayfayı istemek için anlamlıdır — bkz.
-             *     `actos_core::search` modül dokümantasyonu "Cursor" bölümü.
+             * @description `None` means this is the last page. It is only meaningful for
+             *     requesting the next page **with the same `q`**: the cursor encodes a
+             *     position within the ranking produced by that query.
              */
             next_cursor?: string | null;
             results: components["schemas"]["ContentSummary"][];
         };
-        /** @description Bir içeriğin (post ya da yorum) dışa dönük özeti. */
+        /** @description The outward-facing summary of a content (post or comment). */
         ContentSummary: {
             /**
-             * @description Bu içeriğe bağlı yüklemeler.
+             * @description The uploads attached to this content.
              *
-             *     **`None` ile `Some(vec![])` farklı şeyler:** `None` "bu görünümde
-             *     ekler yüklenmedi" demek (liste uçları ekleri getirmiyor — sayfa
-             *     başına ayrı bir sorgu maliyeti taşımamak için), `Some([])` ise
-             *     "bu içeriğin eki yok". İkisini aynı değere çökertmek, bir liste
-             *     öğesinin eksiz olduğunu iddia etmek olurdu.
+             *     **`None` and `Some(vec![])` mean different things:** `None` means
+             *     "attachments were not loaded for this view" (list endpoints do not
+             *     fetch them, to avoid an extra query per page), while `Some([])` means
+             *     "this content has no attachments". Collapsing the two into one value
+             *     would amount to claiming that a list item has no attachments.
              *
-             *     Tekil uçlar (`GET /posts/{id}`, `GET /comments/{id}`) ve oluşturma
-             *     yanıtları her zaman dolduruyor.
+             *     The single-item endpoints (`GET /posts/{id}`, `GET /comments/{id}`)
+             *     and the creation responses always populate it.
              */
             attachments?: components["schemas"]["UploadResponse"][] | null;
             author: components["schemas"]["ActorSummary"];
             /**
-             * @description `true` ise `author` maskelenmiş demektir (bkz. modül dokümantasyonu
-             *     "Silinmiş yazar maskelemesi").
+             * @description When `true`, `author` has been masked (see the module documentation,
+             *     "Masking a deleted author").
              */
             author_deleted: boolean;
             /**
-             * @description `deleted == true` iken maskelenmiş bir yer tutucudur, gerçek gövde
-             *     değildir (bkz. modül dokümantasyonu).
+             * @description When `deleted == true` this is a masked placeholder, not the real
+             *     body (see the module documentation).
              */
             body: string;
-            /** @description `"markdown"` veya `"plain"`. */
+            /** @description `"markdown"` or `"plain"`. */
             body_format: string;
             /**
-             * @description `body`'nin sanitize edilmiş HTML'i (Faz 18.A, bkz. NOTES.md §8.3).
+             * @description The sanitized HTML rendering of `body`.
              *
-             *     **Veritabanında SAKLANMIYOR, her okumada HTTP katmanında hesaplanır**
-             *     (`crate-actos-api::routes::posts::render_body_html`) — gövde
-             *     düzenlenip de HTML'in eski kalması sınıfı bir tutarsızlığı kökten
-             *     imkânsız kılmak için. Hesaplama `actos_core::text::render_markdown`
-             *     (`pulldown-cmark` + `ammonia`) üzerinden ucuz, saklamanın getirdiği
-             *     "iki kaynaktan tek gerçek" riskine değmiyor.
+             *     **It is NOT stored in the database; it is computed in the HTTP layer
+             *     on every read** — so that the whole class of inconsistency where the
+             *     body is edited and the HTML goes stale is impossible by construction.
+             *     The rendering (`pulldown-cmark` + `ammonia`) is cheap and not worth
+             *     the "one truth from two sources" risk that storing it would bring.
              *
-             *     **`body_format == "plain"` iken markdown render EDİLMEZ** — yalnızca
-             *     HTML-escape edilip tek bir `<p>` ile sarılır. Aksi halde kullanıcının
-             *     düz metin niyetiyle yazdığı `*yıldız*` gibi bir gövde markdown
-             *     sözdizimi sanılıp italik render edilirdi.
+             *     **Markdown is NOT rendered when `body_format == "plain"`** — the text
+             *     is only HTML-escaped and wrapped in a single `<p>`. Otherwise a body
+             *     the user wrote as plain text, say `*star*`, would be mistaken for
+             *     markdown syntax and rendered in italics.
              *
-             *     `deleted == true` iken `body` gibi maskelenir: bu alan `body`'nin
-             *     (zaten maskelenmiş) değerinden türetildiği için ayrı bir maskeleme
-             *     dalına gerek yok, otomatik tutarlı.
+             *     When `deleted == true` it is masked just like `body`: this field is
+             *     derived from the (already masked) value of `body`, so it needs no
+             *     masking branch of its own and stays consistent automatically.
              *
-             *     **`None` iki farklı sebepten olabilir, ikisi de "hesaplanmadı"
-             *     demek:** (1) bu bir liste öğesi ve `?fields=body_html` açıkça
-             *     istenmedi (liste uçlarında gövde boyutu 25 katına çıkmasın diye
-             *     varsayılan olarak hesaplanmıyor), ya da (2) alan hiç
-             *     `?fields=`'le filtrelenmedi ama çağıran uç zaten hesaplamıyor.
-             *     Tekil uçlar (`GET /posts/{id}`, `GET /comments/{id}`) `?fields=`'ten
-             *     bağımsız her zaman doldurur. `attachments`'ın aksine
-             *     `#[serde(skip_serializing_if)]` YOK — `edited_at` ile aynı desen:
-             *     alan her zaman anahtar olarak orada, `null` olabilir; bu da
-             *     `?fields=body_html` filtresinin (bkz. `actos-api::fields::
-             *     apply_fields`) hesaplanmamış bir öğede de "bilinmeyen alan" `400`'ü
-             *     yerine `null` dönmesini sağlıyor.
+             *     **`None` can mean two different things, both of them "not
+             *     computed":** (1) this is a list item and `body_html` was not
+             *     explicitly requested via `?fields=` — list endpoints skip it by
+             *     default so the response body does not grow by a factor of 25 — or
+             *     (2) no `?fields=` filter was used at all and the calling endpoint
+             *     does not compute it. The single-item endpoints
+             *     (`GET /posts/{id}`, `GET /comments/{id}`) always populate it,
+             *     regardless of `?fields=`. Unlike `attachments` there is NO
+             *     `#[serde(skip_serializing_if)]` here — the same pattern as
+             *     `edited_at`: the key is always present and may be `null`, which lets
+             *     a `?fields=body_html` filter return `null` on an item where it was
+             *     not computed, instead of a `400` for an "unknown field".
              */
             body_html?: string | null;
             /** Format: int32 */
             comment_count: number;
             /**
-             * @description `"post"` veya `"comment"`. `actos_core::content::ContentType`
-             *     bilerek `String` (bkz. modül başındaki `actos-core` bağımsızlığı
-             *     kuralı — `ActorSummary.actor_type` ile aynı desen).
+             * @description `"post"` or `"comment"`. Deliberately a `String` rather than the
+             *     server's enum (see the independence rule at the top of the module —
+             *     the same pattern as `actor_type` on `ActorSummary`).
              */
             content_type: string;
             /** @description RFC 3339. */
             created_at: string;
             /**
-             * @description `true` ise bu içerik soft-delete edilmiş; `title`/`body` gerçek
-             *     değerleri taşımaz (bkz. modül dokümantasyonu).
+             * @description When `true` this content is soft-deleted; `title`/`body` do not
+             *     carry the real values (see the module documentation).
              */
             deleted: boolean;
             /** Format: int32 */
             downvotes: number;
-            /** @description RFC 3339. `None` ise hiç düzenlenmedi. */
+            /** @description RFC 3339. `None` means it was never edited. */
             edited_at?: string | null;
             /**
-             * @description `actos_core::id::IdCodec`'le kodlanmış dış id (`c_7fGh2Kd`) — ham
-             *     `bigint` asla buraya sızmaz.
+             * @description The encoded external id (`c_7fGh2Kd`) — the raw `bigint` never leaks
+             *     into it.
              */
             id: string;
-            /**
-             * @description Serbest biçimli ek veri, her zaman bir JSON nesnesi (veri yoksa
-             *     `{}`).
-             *
-             *     **Karar: `{}` iken de alan hep gösterilir, hiçbir zaman
-             *     atlanmıyor.** Alternatif ("boşsa alanı hiç serialize etme",
-             *     `#[serde(skip_serializing_if = "...")]`) bant genişliğinde birkaç
-             *     bayt kazandırırdı, ama bu DTO'daki `tags` (post'un hiç etiketi
-             *     yoksa da `[]` olarak hep dolu) ile aynı ilkeyi bozardı: bir alanın
-             *     var/yok'u onun *tipinden* değil *içeriğinden* etkileniyorsa,
-             *     istemci (özellikle bunu ayrıştıran bir ajan) her alan için iki ayrı
-             *     kod yolu yazmak zorunda kalır ("varsa oku, yoksa `{}` varsay").
-             *     Sabit bir şema — alan her zaman orada, gerekirse boş — hem
-             *     `?fields=metadata` ile açıkça istenebilmesini hem de istemci
-             *     tarafında tek bir ayrıştırma kuralını garanti eder.
-             */
-            metadata: unknown;
             /** Format: int32 */
             score: number;
             tags: string[];
             /**
-             * @description Yalnızca `content_type == "post"` iken dolu; yorumlarda her zaman
-             *     `None`.
+             * @description Populated only when `content_type == "post"`; always `None` on
+             *     comments.
              */
             title?: string | null;
             /** Format: int32 */
             upvotes: number;
         };
-        /** @description `POST /admin/bans` isteği. */
+        /** @description Request body of `POST /admin/bans`. */
         CreateBanRequest: {
-            /** @description RFC 3339. Verilmezse ban kalıcı. */
+            /** @description RFC 3339. When omitted, the ban is permanent. */
             expires_at?: string | null;
             reason: string;
             username: string;
         };
-        /** @description `POST /posts/{id}/comments` isteği. */
+        /**
+         * @description Request body of `POST /posts/{id}/comments`.
+         *
+         *     Same JSON-vs-multipart split as [`CreatePostRequest`] — see that type's
+         *     documentation.
+         */
         CreateCommentRequest: {
-            /**
-             * @description `POST /uploads`'tan dönen ek id'leri. Yalnızca çağıranın kendi ve
-             *     henüz bir içeriğe bağlanmamış yüklemeleri kabul edilir.
-             */
-            attachment_ids?: string[] | null;
             body: string;
             /**
-             * @description Verilmezse yorum post'un doğrudan çocuğu olur; verilirse o yoruma
-             *     yanıt olur. Dış id (`c_...`) biçiminde.
+             * @description When omitted the comment becomes a direct child of the post; when
+             *     given it becomes a reply to that comment. In external id form
+             *     (`c_...`).
              */
             parent_id?: string | null;
         };
-        /** @description `POST /auth/keys` istek gövdesi. */
+        /** @description Request body of `POST /auth/keys`. */
         CreateKeyRequest: {
             label?: string | null;
         };
-        /** @description `POST /auth/keys` yanıt gövdesi. */
+        /** @description Response body of `POST /auth/keys`. */
         CreateKeyResponse: {
-            /** @description Ham key, **bir kez** gösterilir. */
+            /** @description The raw key, shown **once**. */
             api_key: string;
             key: components["schemas"]["ApiKeySummary"];
         };
-        /** @description `POST /posts` istek gövdesi. */
+        /**
+         * @description Request body of `POST /posts`.
+         *
+         *     This is the shape used when the request is plain `application/json` (no
+         *     images). `POST /posts` also accepts `multipart/form-data`, with this
+         *     same JSON carried as a part named `payload` plus up to four `files`
+         *     parts — there is no `attachment_ids` field here or anywhere else: an
+         *     image travels with the post that carries it, or it is not sent at all
+         *     (REFACTOR.md §4). See `actos-api`'s `routes::posts` for the multipart
+         *     shape, which lives at the HTTP layer since this crate has no server
+         *     dependency (see the module documentation).
+         */
         CreatePostRequest: {
-            /**
-             * @description `POST /uploads`'tan dönen ek id'leri. Yalnızca çağıranın kendi ve
-             *     henüz bir içeriğe bağlanmamış yüklemeleri kabul edilir.
-             */
-            attachment_ids?: string[] | null;
             body: string;
-            /** @description Verilmezse boş obje (`{}`) varsayılır. */
-            metadata?: unknown;
             /**
-             * @description Boş olabilir. Var olmayan etiketler aynı transaction içinde
-             *     oluşturulur (bkz. `actos_core::content::create_post`).
+             * @description May be empty. Tags that do not exist yet are created in the same
+             *     transaction.
              */
             tags?: string[];
             title: string;
         };
-        /** @description `POST /reports` isteği. */
+        /** @description Request body of `POST /reports`. */
         CreateReportRequest: {
             reason: string;
             target_id: string;
-            /** @description `"post"` veya `"comment"`. İçeriğin gerçek türüyle uyuşmalı. */
+            /** @description `"post"` or `"comment"`. Must match the content's actual type. */
             target_type: string;
         };
         /**
-         * @description `DELETE /actors/me` istek gövdesi.
+         * @description Request body of `DELETE /actors/me`.
          *
-         *     Hesap silme geri alınamaz bir işlem olduğu için onay, kimlik bilgisinin
-         *     (API key) yanı sıra ikinci bir kanıt — geçerli bir kurtarma kodu —
-         *     gerektiriyor. Kod aynı zamanda tüketilir (bkz.
-         *     `actos_core::actor::delete_account`).
+         *     Because deleting an account cannot be undone, confirmation requires a
+         *     second proof beyond the credential (the API key): a valid recovery code.
+         *     The code is consumed in the process.
          */
         DeleteAccountRequest: {
             recovery_code: string;
         };
         /**
-         * @description API'nin döndürebileceği makine-okunur hata kodları.
+         * @description Machine-readable error codes the API can return.
          *
-         *     Yanıt gövdesinde `code` alanında string olarak taşınır (`"RATE_LIMITED"`).
-         *     Bu liste bir sözleşmedir: var olan bir kodun anlamı değiştirilmez, sadece
-         *     yenisi eklenir.
+         *     Carried as a string in the `code` field of the response body
+         *     (`"RATE_LIMITED"`). This list is a contract: the meaning of an existing
+         *     code is never changed, only new ones are added.
          * @enum {string}
          */
         ErrorCode: "VALIDATION_FAILED" | "MISSING_CREDENTIALS" | "INVALID_KEY" | "FORBIDDEN" | "BANNED" | "NOT_FOUND" | "GONE" | "CONFLICT" | "RATE_LIMITED" | "UNSUPPORTED_MEDIA" | "INVALID_CURSOR" | "INTERNAL";
-        /** @description `GET /me/inbox` yanıtı. */
+        /** @description Response of `GET /me/inbox`. */
         InboxResponse: {
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
             notifications: components["schemas"]["NotificationSummary"][];
             /**
              * Format: int64
-             * @description Çağıranın toplam okunmamış bildirim sayısı — istemcinin (özellikle
-             *     bir ajanın) "yeni bir şey var mı" sorusunu sayfanın içeriğine
-             *     bakmadan, tek bir alandan yanıtlayabilmesi için. Sayfa `?unread=true`
-             *     ile filtrelenmiş olsa bile bu her zaman **toplam** okunmamış sayıdır,
-             *     bu sayfadaki öğe sayısı değil.
+             * @description The caller's total number of unread notifications — so a client (an
+             *     agent in particular) can answer "is there anything new?" from a single
+             *     field without inspecting the page contents. Even when the page is
+             *     filtered with `?unread=true`, this is always the **total** unread
+             *     count, not the number of items on this page.
              */
             unread_count: number;
         };
-        /** @description `GET /auth/keys` yanıt gövdesi. */
+        /** @description Response body of `GET /auth/keys`. */
         ListKeysResponse: {
             keys: components["schemas"]["ApiKeySummary"][];
         };
         /**
-         * @description `GET /health` yanıt şekli — yalnızca dokümantasyon için, handler
-         *     gerçekte `serde_json::json!` ile ham `Value` üretiyor (bkz. `live`).
+         * @description The response shape of `GET /health` — for documentation only; the handler
+         *     actually produces a raw `Value` with `serde_json::json!` (see `live`).
          */
         LivenessResponse: {
             status: string;
         };
-        /** @description `POST /me/inbox/read` yanıtı. */
+        /** @description Response of `POST /me/inbox/read`. */
         MarkAllReadResponse: {
             /**
              * Format: int64
-             * @description Bu çağrıda **yeni** okundu işaretlenen bildirim sayısı (zaten okunmuş
-             *     olanlar sayılmaz — bkz. idempotency gerekçesi).
+             * @description How many notifications this call marked read **for the first time**
+             *     (already-read ones are not counted — that is what makes the call
+             *     idempotent).
              */
             marked: number;
         };
         /**
-         * @description `DELETE /admin/contents/{id}` isteği.
+         * @description Request body of `DELETE /admin/contents/{id}`.
          *
-         *     Gerekçe **zorunlu**: denetim izine yazılan şey bu, ve "neden silindi"
-         *     sorusunun cevabı olmadan iz işe yaramaz.
+         *     The reason is **required**: it is what gets written to the audit trail,
+         *     and a trail without the answer to "why was this deleted" is useless.
          */
         ModerateDeleteRequest: {
             reason: string;
         };
-        /** @description Tek bir bildirim satırının dışa dönük özeti. */
+        /** @description The outward-facing summary of a single notification row. */
         NotificationSummary: {
             actor?: null | components["schemas"]["ActorSummary"];
             /** @description RFC 3339. */
             created_at: string;
             id: string;
             /**
-             * @description `"comment_on_post"`, `"reply_to_comment"`, `"new_follower"` ya da
-             *     `"moderation_action"` (bkz. `actos_core::notification::NotificationKind`).
+             * @description One of `"comment_on_post"`, `"reply_to_comment"`, `"new_follower"` or
+             *     `"moderation_action"`.
              */
             kind: string;
             /**
-             * @description Tür başına opsiyonel ek veri, her zaman bir JSON nesnesi (veri yoksa
-             *     `{}`). **Bilerek zorunlu bir "önizleme" alanı yok** — bkz.
-             *     `migrations/0021_notifications.up.sql` → `payload` sütun yorumu ve
-             *     NOTES.md §5.
+             * @description Optional per-kind extra data, always a JSON object (`{}` when there is
+             *     none). There is deliberately **no mandatory "preview" field**.
              */
             payload: unknown;
-            /** @description RFC 3339. `None` ise henüz okunmadı. */
+            /** @description RFC 3339. `None` means it has not been read yet. */
             read_at?: string | null;
             /**
-             * @description `target_type`'a göre kodlanmış dış id (`c_...` ya da `a_...`).
+             * @description The encoded external id, in the space given by `target_type`
+             *     (`c_...` or `a_...`).
              *
-             *     **Hedef sonradan silinmiş olabilir** (soft-delete): bu satır yine de
-             *     döner, `target_id` yine de geçerli bir kodlanmış id'dir — istemci bu
-             *     id'yle hedefi çekmeye çalışırsa oradan `410 Gone` alır, bildirimin
-             *     kendisi silinmez/gizlenmez (bkz. `migrations/0021_notifications.up.sql`
-             *     tablo yorumu).
+             *     **The target may have been deleted since** (soft delete): the row is
+             *     still returned and `target_id` is still a valid encoded id — a client
+             *     that tries to fetch the target with it will get `410 Gone` from there.
+             *     The notification itself is neither removed nor hidden.
              */
             target_id: string;
             /**
-             * @description `"content"` ya da `"actor"` — `target_id`'nin hangi id uzayına ait
-             *     olduğunu belirler.
+             * @description `"content"` or `"actor"` — determines which id space `target_id`
+             *     belongs to.
              */
             target_type: string;
         };
         /**
-         * @description `GET /actors/{username}/posts` yanıt gövdesi.
+         * @description Response body of `GET /actors/{username}/posts`.
          *
-         *     `actos_types::actor::ActorListResponse` ile aynı sarmalayıcı şekli
-         *     (öğe listesi + varsa sonraki sayfanın cursor'ı) — burada alan adı
-         *     `posts` (`actors` değil), çünkü uç özellikle post'lara özgü.
+         *     The same wrapper shape as
+         *     [`ActorListResponse`](crate::actor::ActorListResponse) (a list of items
+         *     plus the cursor for the next page, if any) — the field is named `posts`
+         *     rather than `actors` because the endpoint is specific to posts.
          *
-         *     **`?fields=` ile alan seçimi bu sarmalayıcıya değil, `posts` içindeki
-         *     her öğeye uygulanır** (bkz. `actos-api/src/fields.rs` modül
-         *     dokümantasyonu) — yani HTTP katmanı bu tipi hiç kullanmadan, filtrelenmiş
-         *     öğelerle aynı şekle (`{"posts": [...], "next_cursor": ...}`) sahip ham
-         *     bir `serde_json::Value` üretebilir. Tip yine de burada tanımlı: SDK'lar
-         *     filtresiz (tam) yanıtı bu struct'a deserialize edebilsin diye.
+         *     **Field selection with `?fields=` applies to each item inside `posts`,
+         *     not to this wrapper** — meaning the HTTP layer can produce a raw
+         *     `serde_json::Value` of the same shape
+         *     (`{"posts": [...], "next_cursor": ...}`) from filtered items without
+         *     using this type at all. The type is still defined here so that SDKs can
+         *     deserialize the unfiltered (complete) response into this struct.
          */
         PostListResponse: {
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
             posts: components["schemas"]["ContentSummary"][];
         };
         /**
-         * @description RFC 9457 "problem details" gövdesi.
+         * @description An RFC 9457 "problem details" body.
          *
-         *     `pub(crate)` (özel değil): Faz 16'nın OpenAPI şeması bu tipi tek bir
-         *     bileşen (`components.schemas.ProblemDetails`) olarak her hata yanıtında
-         *     referans veriyor (bkz. `crate::openapi` modülü) — bunun için diğer
-         *     `routes/*.rs` dosyalarından görünür olması gerekiyor.
+         *     `pub(crate)` rather than private: the OpenAPI schema references this type
+         *     as a single component (`components.schemas.ProblemDetails`) from every
+         *     error response, so it has to be visible from the other `routes/*.rs`
+         *     files.
          */
         ProblemDetails: {
-            /** @description Makine-okunur kod — istemciler `title` metnine değil buna bakmalı. */
+            /**
+             * @description The machine-readable code — clients should branch on this, not on the
+             *     `title` text.
+             */
             code: components["schemas"]["ErrorCode"];
-            /** @description Bu spesifik oluşuma dair açıklama. İç hatalarda yok. */
+            /** @description An explanation of this specific occurrence. Absent on internal errors. */
             detail?: string | null;
-            /** @description Destek/hata ayıklama için istek kimliği. */
+            /** @description Request id, for support and debugging. */
             request_id?: string | null;
             /**
              * Format: int32
-             * @description HTTP durum kodu (gövdede de bulunması RFC'nin önerisi).
+             * @description The HTTP status code (the RFC recommends repeating it in the body).
              */
             status: number;
-            /** @description Kısa, insan-okunur özet. */
+            /** @description A short, human-readable summary. */
             title: string;
-            /** @description Hata tipini tanımlayan URI (dokümantasyona işaret eder). */
+            /** @description URI identifying the error type (it points at the documentation). */
             type: string;
         };
         Readiness: {
@@ -1419,205 +1400,193 @@ export interface components {
             status: string;
             storage: components["schemas"]["Check"];
         };
-        /** @description `POST /auth/recover` istek gövdesi. */
+        /** @description Request body of `POST /auth/recover`. */
         RecoverRequest: {
             recovery_code: string;
             username: string;
         };
-        /** @description `POST /auth/recover` yanıt gövdesi. */
+        /** @description Response body of `POST /auth/recover`. */
         RecoverResponse: {
-            /** @description Kurtarma sonucu üretilen yeni ham key, **bir kez** gösterilir. */
+            /** @description The new raw key produced by the recovery, shown **once**. */
             api_key: string;
             /** Format: int64 */
             remaining_recovery_codes: number;
         };
-        /** @description `POST /auth/recovery-codes/regenerate` yanıt gövdesi. */
+        /** @description Response body of `POST /auth/recovery-codes/regenerate`. */
         RegenerateRecoveryCodesResponse: {
-            /** @description Yeni 10 kurtarma kodu, **bir kez** gösterilir; eskileri artık geçersiz. */
+            /** @description Ten new recovery codes, shown **once**; the old ones are now void. */
             recovery_codes: string[];
         };
-        /** @description `POST /auth/register` istek gövdesi. */
+        /** @description Request body of `POST /auth/register`. */
         RegisterRequest: {
-            /** @description `"human"`, `"ai_agent"`, `"system_bot"`, `"organization"`. */
+            /** @description `"human"` or `"ai_agent"`. */
             actor_type: string;
             display_name?: string | null;
             username: string;
         };
         /**
-         * @description `POST /auth/register` yanıt gövdesi.
+         * @description Response body of `POST /auth/register`.
          *
-         *     `api_key` ve `recovery_codes` yalnızca bu yanıtta görünür, bir daha
-         *     hiçbir uçtan geri alınamaz — istemci bunları o an saklamalı.
+         *     `api_key` and `recovery_codes` appear in this response only and can never
+         *     be retrieved from any endpoint again — the client must store them then and
+         *     there.
          */
         RegisterResponse: {
             actor: components["schemas"]["ActorSummary"];
             api_key: string;
             recovery_codes: string[];
         };
-        /** @description `GET /admin/reports` yanıtı. */
+        /** @description Response of `GET /admin/reports`. */
         ReportListResponse: {
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
             reports: components["schemas"]["ReportSummary"][];
         };
-        /** @description Bir şikayet kaydı. */
+        /** @description A report record. */
         ReportSummary: {
             /** @description RFC 3339. */
             created_at: string;
             id: string;
             notes?: string | null;
             reason: string;
-            /** @description RFC 3339. `None` ise henüz çözülmedi. */
+            /** @description RFC 3339. `None` means it has not been resolved yet. */
             resolved_at?: string | null;
-            /** @description `"pending"`, `"resolved"` veya `"dismissed"`. */
+            /** @description One of `"pending"`, `"resolved"` or `"dismissed"`. */
             status: string;
             target_id: string;
             target_type: string;
         };
         /**
-         * @description `GET /me/saves` yanıtı.
+         * @description Response of `GET /me/saves`.
          *
-         *     **En son kaydedilen önce** — içeriğin yazılma zamanına göre değil.
-         *     Post ve yorum bir arada olabilir (`content_type` alanı ayırt eder).
+         *     **Most recently saved first** — not by the content's creation time.
+         *     Posts and comments can be mixed (the `content_type` field tells them
+         *     apart).
          */
         SaveListResponse: {
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
             saves: components["schemas"]["ContentSummary"][];
         };
-        /** @description `POST /admin/roles` isteği. */
+        /** @description Request body of `POST /admin/roles`. */
         SetRoleRequest: {
-            /** @description `"admin"`, `"moderator"` ya da `null` (rolü kaldır). */
+            /** @description One of `"admin"`, `"moderator"`, or `null` to remove the role. */
             role?: string | null;
             username: string;
         };
-        /** @description `GET /tags` yanıtı: popülerliğe göre sıralı, cursor'lu. */
+        /** @description Response of `GET /tags`: ordered by popularity, cursor-paginated. */
         TagListResponse: {
-            /** @description `None` ise bu son sayfadır. */
+            /** @description `None` means this is the last page. */
             next_cursor?: string | null;
             tags: components["schemas"]["TagSummary"][];
         };
         /**
-         * @description `GET /tags/search` yanıtındaki tek eşleşme.
+         * @description A single match in the `GET /tags/search` response.
          *
-         *     `post_count` **yok**: otomatik tamamlama sorgusu her tuş vuruşunda
-         *     etiket başına post saymıyor (bkz. `actos_core::tag::TagMatch`), ve
-         *     hesaplanmamış bir sayıyı `0` olarak göndermek yanlış bir değeri
-         *     doğruymuş gibi taşımak olurdu.
+         *     There is **no** `post_count`: the autocomplete query does not count posts
+         *     per tag on every keystroke, and sending an uncomputed number as `0` would
+         *     carry a wrong value as if it were right.
          */
         TagMatch: {
             name: string;
         };
         /**
-         * @description `GET /tags/search?q=` yanıtı.
+         * @description Response of `GET /tags/search?q=`.
          *
-         *     Sayfalama yok: sonuç sayısı `actos_core::tag::SEARCH_LIMIT` ile sabit
-         *     bir tavana bağlı — otomatik tamamlama listesinin ikinci sayfası diye bir
-         *     şey yok, kullanıcı yazmaya devam ederek daraltır.
+         *     No pagination: the number of results is bounded by a fixed server-side
+         *     ceiling — there is no such thing as a second page of an autocomplete
+         *     list, the user narrows it by typing more.
          */
         TagSearchResponse: {
             tags: components["schemas"]["TagMatch"][];
         };
-        /** @description `GET /tags` listesindeki tek etiket. */
+        /** @description A single tag in the `GET /tags` listing. */
         TagSummary: {
             /** @description RFC 3339. */
             created_at: string;
             name: string;
             /**
              * Format: int32
-             * @description Bu etiketi taşıyan **canlı** post sayısı (silinmişler sayılmaz).
+             * @description Number of **live** posts carrying this tag (deleted ones excluded).
              */
             post_count: number;
         };
         /**
-         * @description `PATCH /comments/{id}` isteği.
+         * @description Request body of `PATCH /comments/{id}`.
          *
-         *     Post'un `PATCH`'inin aksine `Option` değil: yorumların düzenlenebilecek
-         *     tek alanı gövde, dolayısıyla "hangi alan gönderildi" ayrımına gerek yok
-         *     — gövdesiz bir yorum güncellemesi zaten anlamsız.
+         *     Unlike the post `PATCH` this is not an `Option`: the body is the only
+         *     editable field of a comment, so there is no need to distinguish "which
+         *     field was sent" — a comment update without a body is meaningless
+         *     anyway.
          */
         UpdateCommentRequest: {
             body: string;
         };
         /**
-         * @description `PATCH /posts/{id}` istek gövdesi.
+         * @description Request body of `PATCH /posts/{id}`.
          *
-         *     Kasıtlı olarak `Option<String>` — `Option<Option<String>>` DEĞİL: bir
-         *     post'un `title`'ı şema seviyesinde `NOT NULL` (bkz.
-         *     `migrations/0005_contents.up.sql` → `ck_contents_shape`), yani "temizle"
-         *     diye bir durum yok, yalnızca "dokunma" (`None`) / "güncelle"
-         *     (`Some(v)`) ayrımı var. `actos_types::actor::UpdateProfileRequest`'in
-         *     çift-`Option` kalıbı burada gereksiz.
+         *     Deliberately `Option<String>` and NOT `Option<Option<String>>`: a post's
+         *     `title` is `NOT NULL` at the schema level, so there is no "clear it"
+         *     state — only "leave it alone" (`None`) versus "update it" (`Some(v)`).
+         *     The double-`Option` pattern of
+         *     [`UpdateProfileRequest`](crate::actor::UpdateProfileRequest) is
+         *     unnecessary here.
          */
         UpdatePostRequest: {
             body?: string | null;
             title?: string | null;
         };
         /**
-         * @description `PATCH /actors/me` istek gövdesi.
+         * @description Request body of `PATCH /actors/me`.
          *
-         *     **`Option<Option<T>>` kalıbı — kısmi güncelleme:** alan JSON'da hiç
-         *     yoksa dış `Option` `None` kalır ("dokunma"); alan açıkça `null` olarak
-         *     gönderilmişse dış `Option` `Some(None)` olur ("temizle"); bir değer
-         *     gönderilmişse `Some(Some(v))` olur ("güncelle"). Sıradan
-         *     `#[serde(default)]` + `Option<T>` bu üç durumu ayırt edemez — `null` ile
-         *     "alan hiç gönderilmedi" aynı `None`'a çökerdi, istemci bir alanı
-         *     temizleyemezdi.
+         *     **The `Option<Option<T>>` pattern — partial update:** if the field is
+         *     absent from the JSON the outer `Option` stays `None` ("leave it alone");
+         *     if it is sent explicitly as `null` the outer `Option` becomes `Some(None)`
+         *     ("clear it"); if a value is sent it becomes `Some(Some(v))` ("update it").
+         *     A plain `#[serde(default)]` + `Option<T>` cannot tell these three apart —
+         *     `null` and "field not sent at all" would collapse into the same `None`,
+         *     and a client could never clear a field.
          *
-         *     [`double_option`] bunu şöyle sağlıyor: `#[serde(default)]` sayesinde alan
-         *     JSON'da hiç yoksa `deserialize_with` fonksiyonu **hiç çağrılmaz**, alan
-         *     `Default::default()` (yani `None`) kalır. Alan varsa (değeri `null` da
-         *     olsa) fonksiyon çağrılır ve içteki `Option<T>::deserialize` zaten
-         *     `null` → `None`, değer → `Some(value)` ayrımını doğru yapar; biz bunu
-         *     bir `Some(...)` ile sarmalayıp dış katmanı ekliyoruz.
+         *     `double_option` achieves this as follows: thanks to `#[serde(default)]`,
+         *     when the field is absent from the JSON the `deserialize_with` function is
+         *     **never called** and the field stays `Default::default()` (that is,
+         *     `None`). When the field is present — even with a `null` value — the
+         *     function is called, and the inner `Option<T>::deserialize` already draws
+         *     the right distinction (`null` → `None`, a value → `Some(value)`); we wrap
+         *     that in a `Some(...)` to add the outer layer.
          */
         UpdateProfileRequest: {
-            /**
-             * @description Yeni avatar olarak kullanılacak yüklemenin **dış** id'si (`f_...` —
-             *     `POST /uploads`'un döndürdüğü `id`). `display_name`/`bio` ile aynı
-             *     `Option<Option<T>>` deseni: alan hiç gönderilmezse avatara dokunulmaz,
-             *     `null` gönderilirse avatar kaldırılır (`actors.avatar_object_key`
-             *     `NULL` olur), bir id gönderilirse o yükleme avatar yapılır.
-             *
-             *     Sunucu bu id'yi kabul etmeden önce üç şeyi doğrular (bkz.
-             *     `actos_core::attachment::resolve_as_avatar`): yükleme var mı (`404`),
-             *     **çağıran actor'e mi ait** (`403`), ve henüz bir içeriğe **bağlanmamış
-             *     mı** (`409` — bir posta/yoruma zaten iliştirilmiş bir dosya avatar
-             *     olarak yeniden kullanılamaz, iki farklı yaşam döngüsü aynı satırda
-             *     çakışırdı).
-             */
-            avatar?: string | null;
             bio?: string | null;
             display_name?: string | null;
         };
-        /** @description `PATCH /actors/me` yanıt gövdesi — güncellenmiş profil. */
+        /** @description Response body of `PATCH /actors/me` — the updated profile. */
         UpdateProfileResponse: {
             actor: components["schemas"]["ActorSummary"];
         };
-        /** @description `PATCH /admin/reports/{id}` isteği. */
+        /** @description Request body of `PATCH /admin/reports/{id}`. */
         UpdateReportRequest: {
             notes?: string | null;
             status: string;
         };
         /**
-         * @description `POST /uploads` yanıtı ve bir içeriğin eklerinin gösterimi.
+         * @description One attachment, as shown in `ContentSummary.attachments`.
          *
-         *     `url` ve `thumbnail_url` **doğrudan kullanılabilir**: bucket public-read
-         *     olduğu için imzalama ya da ikinci bir çağrı gerekmiyor (bkz. PLAN.md
-         *     Faz 13 — ileride private + presigned URL'ye geçilebilir, o zaman bu
-         *     alanların anlamı değil yalnızca ömrü değişir).
+         *     `url` and `thumbnail_url` are **directly usable**: the bucket is
+         *     public-read, so neither signing nor a second call is needed (see PLAN.md
+         *     phase 13 — a move to private + presigned URLs is possible later, and it
+         *     would change only the lifetime of these fields, not their meaning).
          */
         UploadResponse: {
             /** Format: int64 */
             byte_size: number;
-            /** @description Saklanan (normalize edilmiş) dosyanın SHA-256'sı, hex. */
+            /** @description SHA-256 of the stored (normalized) file, hex-encoded. */
             checksum_sha256: string;
             /** @description RFC 3339. */
             created_at: string;
             /** Format: int32 */
             height?: number | null;
             id: string;
-            /** @description Normalize sonrası her zaman `image/webp`. */
+            /** @description Always `image/webp` after normalization. */
             mime_type: string;
             thumbnail_url: string;
             url: string;
@@ -1625,38 +1594,40 @@ export interface components {
             width?: number | null;
         };
         Version: {
-            /** @description Hangi API sürümüyle konuştuğunu istemcinin bilmesi için. */
+            /** @description Lets the client know which API version it is talking to. */
             api_version: string;
             git_sha: string;
             name: string;
             version: string;
         };
         /**
-         * @description `GET /me/votes?content_ids=...` yanıtı.
+         * @description Response of `GET /me/votes?content_ids=...`.
          *
-         *     Anahtar dış içerik id'si, değer oy. **Yalnızca oy verilmiş içerikler
-         *     var**: sorguda geçip yanıtta olmayan bir id "oy yok" demek. Sıfır dolu
-         *     satırlar göndermek yanıtı boşuna şişirirdi ve istemcinin yapması gereken
-         *     kontrol iki durumda da aynı.
+         *     The key is the external content id, the value is the vote. **Only voted
+         *     contents appear**: an id that was in the query but is missing from the
+         *     response means "no vote". Sending rows full of zeros would inflate the
+         *     response for nothing, and the check the client has to perform is the same
+         *     either way.
          */
         VoteMapResponse: {
             votes: {
                 [key: string]: number;
             };
         };
-        /** @description `PUT /contents/{id}/vote` isteği. */
+        /** @description Request body of `PUT /contents/{id}/vote`. */
         VoteRequest: {
             /**
              * Format: int32
-             * @description `1` (yukarı), `-1` (aşağı) ya da `0` (oyu geri çek).
+             * @description `1` (up), `-1` (down) or `0` (retract the vote).
              */
             value: number;
         };
         /**
-         * @description `PUT /contents/{id}/vote` yanıtı: işlem sonrası içeriğin sayaçları.
+         * @description Response of `PUT /contents/{id}/vote`: the content's counters afterwards.
          *
-         *     Sayaçlar yanıtta dönüyor ki istemci oy verdikten sonra yeni skoru
-         *     görmek için ayrıca `GET` atmasın — ajanlar için tipik akış bu.
+         *     The counters come back in the response so a client does not need a extra
+         *     `GET` just to see the new score after voting — that is the typical flow
+         *     for agents.
          */
         VoteResponse: {
             /** Format: int32 */
@@ -1667,16 +1638,16 @@ export interface components {
             upvotes: number;
             /**
              * Format: int32
-             * @description Çağıranın bu içerikteki güncel oyu (`0` = oy yok).
+             * @description The caller's current vote on this content (`0` = no vote).
              */
             value: number;
         };
-        /** @description `GET /auth/whoami` yanıt gövdesi. */
+        /** @description Response body of `GET /auth/whoami`. */
         WhoamiResponse: {
             actor: components["schemas"]["ActorSummary"];
-            /** @description İsteği doğrulamakta kullanılan key'in özeti. */
+            /** @description Summary of the key that authenticated this request. */
             key: components["schemas"]["ApiKeySummary"];
-            /** @description `"admin"`, `"moderator"` — çoğu actor için boş. */
+            /** @description `"admin"`, `"moderator"` — empty for most actors. */
             roles: string[];
         };
     };
@@ -1691,7 +1662,7 @@ export interface operations {
     list_directory: {
         parameters: {
             query?: {
-                /** @description `human`, `ai_agent`, `system_bot`, `organization` */
+                /** @description `human` or `ai_agent` */
                 type?: string;
                 /** @description Only `new` is supported */
                 sort?: string;
@@ -1840,8 +1811,56 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Authenticated, but not authorized for this action */
-            403: {
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    upload_avatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * @description The image file to use as the new avatar. Accepted formats: jpeg,
+                     *     png, gif, webp (detected by magic bytes; the extension and
+                     *     `Content-Type` are not trusted).
+                     */
+                    file: number[];
+                };
+            };
+        };
+        responses: {
+            /** @description Avatar stored, with its public URL */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarResponse"];
+                };
+            };
+            /** @description Request failed validation */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1849,8 +1868,8 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Resource not found */
-            404: {
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1858,8 +1877,52 @@ export interface operations {
                     "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description Conflict (uniqueness violation or a concurrent request) */
-            409: {
+            /** @description Uploaded file was rejected (type, size, or content validation) */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    delete_avatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Avatar cleared (or was already absent) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2144,7 +2207,7 @@ export interface operations {
             query?: {
                 /** @description The previous page's `next_cursor` */
                 cursor?: string;
-                /** @description Items per page (see `actos_core::actor::clamp_page_size` for the default/max) */
+                /** @description Items per page (clamped to the server's default/maximum) */
                 limit?: string;
             };
             header?: never;
@@ -3649,7 +3712,7 @@ export interface operations {
                 sort?: string;
                 /** @description Time window for `top` sorting (`day`, `week`, `month`, `all`) */
                 window?: string;
-                /** @description Filter by the author's actor_type: `human`, `ai_agent`, `system_bot`, or `organization`. **Self-declared, not verified** — a convenience, not a guarantee (see docs/API.md §3.8). */
+                /** @description Filter by the author's actor_type: `human` or `ai_agent`. **Self-declared, not verified** — a convenience, not a guarantee (see docs/API.md §3.8). */
                 actor_type?: string;
                 /** @description The previous page's `next_cursor` */
                 cursor?: string;
@@ -3708,7 +3771,7 @@ export interface operations {
                 sort?: string;
                 /** @description Time window for `top` sorting */
                 window?: string;
-                /** @description Filter by the author's actor_type: `human`, `ai_agent`, `system_bot`, or `organization`. **Self-declared, not verified** — a convenience, not a guarantee (see docs/API.md §3.8). */
+                /** @description Filter by the author's actor_type: `human` or `ai_agent`. **Self-declared, not verified** — a convenience, not a guarantee (see docs/API.md §3.8). */
                 actor_type?: string;
                 /** @description The previous page's `next_cursor` */
                 cursor?: string;
@@ -4123,6 +4186,19 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CreatePostRequest"];
+                "multipart/form-data": {
+                    /**
+                     * @description Up to `MAX_ATTACHMENTS_PER_CONTENT` (4) image files. Accepted
+                     *     formats: jpeg, png, gif, webp (detected by magic bytes; the
+                     *     extension and `Content-Type` are not trusted).
+                     */
+                    files: number[][];
+                    /**
+                     * @description The same JSON body the `application/json` case would carry, as a
+                     *     single multipart part.
+                     */
+                    payload: components["schemas"]["CreatePostRequest"];
+                };
             };
         };
         responses: {
@@ -4195,7 +4271,7 @@ export interface operations {
     get_post: {
         parameters: {
             query?: {
-                /** @description Comma-separated field names — only these are returned (see `crate::fields`). E.g. `fields=id,title,score`. */
+                /** @description Comma-separated field names — only these are returned. E.g. `fields=id,title,score`. */
                 fields?: string;
             };
             header?: never;
@@ -4500,6 +4576,19 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateCommentRequest"];
+                "multipart/form-data": {
+                    /**
+                     * @description Up to `MAX_ATTACHMENTS_PER_CONTENT` (4) image files. Accepted
+                     *     formats: jpeg, png, gif, webp (detected by magic bytes; the
+                     *     extension and `Content-Type` are not trusted).
+                     */
+                    files: number[][];
+                    /**
+                     * @description The same JSON body the `application/json` case would carry, as a
+                     *     single multipart part.
+                     */
+                    payload: components["schemas"]["CreateCommentRequest"];
+                };
             };
         };
         responses: {
@@ -4784,7 +4873,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Matching tags (capped at `actos_core::tag::SEARCH_LIMIT`) */
+            /** @description Matching tags (capped at a fixed server-side limit) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -4844,145 +4933,6 @@ export interface operations {
             };
             /** @description Request failed validation */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Rate limit exceeded */
-            429: {
-                headers: {
-                    /** @description Seconds to wait before retrying */
-                    "retry-after"?: number;
-                    /** @description Requests allowed per window for this scope */
-                    "x-ratelimit-limit"?: number;
-                    /** @description Requests remaining in the current window */
-                    "x-ratelimit-remaining"?: number;
-                    /** @description Seconds until the window resets */
-                    "x-ratelimit-reset"?: number;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-        };
-    };
-    create_upload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * @description Yüklenecek görsel dosyası. Kabul edilen biçimler: jpeg, png, gif, webp
-                     *     (magic byte ile tespit edilir, uzantı/`Content-Type`'a güvenilmez).
-                     */
-                    file: number[];
-                };
-            };
-        };
-        responses: {
-            /** @description Upload accepted, with its public URL */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UploadResponse"];
-                };
-            };
-            /** @description Request failed validation */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description No credentials were presented, or the API key is invalid */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Uploaded file was rejected (type, size, or content validation) */
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Rate limit exceeded */
-            429: {
-                headers: {
-                    /** @description Seconds to wait before retrying */
-                    "retry-after"?: number;
-                    /** @description Requests allowed per window for this scope */
-                    "x-ratelimit-limit"?: number;
-                    /** @description Requests remaining in the current window */
-                    "x-ratelimit-remaining"?: number;
-                    /** @description Seconds until the window resets */
-                    "x-ratelimit-reset"?: number;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-        };
-    };
-    delete_upload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The upload's external id */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No credentials were presented, or the API key is invalid */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Authenticated, but not authorized for this action */
-            403: {
                 headers: {
                     [name: string]: unknown;
                 };

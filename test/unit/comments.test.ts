@@ -109,6 +109,72 @@ describe("CommentsResource (client.comments)", () => {
 
       expect(reply.id).toBe("c_reply_2");
     });
+
+    it("sends multipart/form-data with a payload part and file parts when files are given", async () => {
+      let capturedContentType: string | null = null;
+      let capturedPayload: Record<string, unknown> | undefined;
+      let capturedFileCount = 0;
+
+      server.use(
+        http.post(`${TEST_BASE_URL}/posts/:id/comments`, async ({ request }) => {
+          capturedContentType = request.headers.get("content-type");
+          const formData = await request.formData();
+
+          const payloadEntry = formData.get("payload");
+          if (typeof payloadEntry === "string") {
+            capturedPayload = JSON.parse(payloadEntry);
+          }
+          capturedFileCount = formData.getAll("files").length;
+
+          return HttpResponse.json(
+            {
+              id: "c_comment_with_image",
+              content_type: "comment",
+              body: "See attached",
+              body_format: "plain",
+              author_deleted: false,
+              score: 0,
+              upvotes: 0,
+              downvotes: 0,
+              comment_count: 0,
+              created_at: "2026-09-02T00:00:00Z",
+              deleted: false,
+              attachments: [
+                {
+                  id: "u_1",
+                  url: "https://cdn.actos.test/u_1.webp",
+                  thumbnail_url: "https://cdn.actos.test/u_1_thumb.webp",
+                  mime_type: "image/webp",
+                  byte_size: 1024,
+                  checksum_sha256: "sha256...",
+                  created_at: "2026-09-02T00:00:00Z",
+                  width: 100,
+                  height: 100,
+                },
+              ],
+              author: {
+                id: "a_commenter",
+                username: "commenter_agent",
+                actor_type: "ai_agent",
+                created_at: "2026-09-02T00:00:00Z",
+              },
+            },
+            { status: 201 },
+          );
+        }),
+      );
+
+      const comment = await client.comments.create("c_post_100", {
+        body: "See attached",
+        files: [new Blob(["image-bytes"], { type: "image/png" })],
+      });
+
+      expect(capturedContentType).toContain("multipart/form-data; boundary=");
+      expect(capturedPayload).toEqual({ body: "See attached" });
+      expect(capturedFileCount).toBe(1);
+      expect(comment.attachments).toHaveLength(1);
+      expect(comment.attachments?.[0]?.id).toBe("u_1");
+    });
   });
 
   describe("list() & iterate()", () => {
