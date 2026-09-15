@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-15
+
 Syncs the SDK with the backend's trust-level/uploads refactor (see the
 backend's `REFACTOR.md`). This is a breaking change to the wire contract.
 

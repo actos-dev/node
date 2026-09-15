@@ -48,7 +48,7 @@ export class MetaResource extends BaseResource {
   /**
    * Get client SDK version and server version details.
    *
-   * @returns `{ sdk: "0.1.0", server: { apiVersion, gitSha, name, version } }`
+   * @returns `{ sdk: "0.2.0", server: { apiVersion, gitSha, name, version } }`
    */
   async version(): Promise<MetaVersionResponse> {
     try {

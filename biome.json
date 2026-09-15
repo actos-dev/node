@@ -7,7 +7,14 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/dist", "!**/node_modules", "!**/coverage", "!**/src/generated"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/coverage",
+      "!**/src/generated",
+      "!openapi.json"
+    ]
   },
   "formatter": {
     "enabled": true,

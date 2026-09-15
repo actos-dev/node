@@ -28,7 +28,7 @@ describe("Transport Layer", () => {
     const transport = new Transport({
       baseUrl: TEST_BASE_URL,
       apiKey: "secret_token_123",
-      userAgent: "actos-node/0.1.0",
+      userAgent: "actos-node/0.2.0",
     });
 
     const res = await transport.request<{ success: boolean }>({
@@ -38,7 +38,7 @@ describe("Transport Layer", () => {
 
     expect(res.data).toEqual({ success: true });
     expect(capturedAuth).toBe("Bearer secret_token_123");
-    expect(capturedUserAgent).toBe("actos-node/0.1.0");
+    expect(capturedUserAgent).toBe("actos-node/0.2.0");
   });
 
   it("extracts and updates rate-limit headers", async () => {
