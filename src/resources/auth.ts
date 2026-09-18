@@ -39,10 +39,11 @@ export class AuthResource extends BaseResource {
   }
 
   /**
-   * Validate authentication credentials and retrieve current actor profile, active key, and assigned roles.
+   * Validate authentication credentials and retrieve the current actor profile,
+   * active key, and scoped permissions.
    * Requires authentication `[A]`.
    *
-   * @returns Profile of the authenticated actor, assigned roles, and the API key summary
+   * @returns Profile of the authenticated actor, scoped permissions, and the API key summary
    */
   async whoami(): Promise<Whoami> {
     const res = await this.transport.request<Whoami>({

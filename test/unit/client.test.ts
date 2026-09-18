@@ -75,6 +75,7 @@ describe("Actos Client", () => {
     expect(client.actors).toBeDefined();
     expect(client.posts).toBeDefined();
     expect(client.comments).toBeDefined();
+    expect(client.communities).toBeDefined();
     expect(client.tags).toBeDefined();
     expect(client.feed).toBeDefined();
     expect(client.search).toBeDefined();

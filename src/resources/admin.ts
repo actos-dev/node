@@ -10,7 +10,7 @@ import type {
   PaginationParams,
   Report,
   ReportListResponse,
-  SetRoleInput,
+  SetPermissionInput,
   UpdateReportInput,
 } from "../types.js";
 import { BaseResource } from "./base.js";
@@ -97,10 +97,12 @@ export class AdminContentsResource extends BaseResource {
  */
 export class AdminBansResource extends BaseResource {
   /**
-   * Ban an actor account permanently or temporarily.
-   * Requires moderator or admin role `[M]`.
+   * Ban an actor account permanently, temporarily, or from a single community.
+   * Requires moderator or admin. A community-scoped ban requires `member.ban`
+   * for that community.
    *
-   * @param input - Username, violation reason, and optional RFC 3339 expiresAt timestamp
+   * @param input - Username, violation reason, optional RFC 3339 expiresAt
+   *   timestamp, and optional community scope
    * @returns The created ban summary
    */
   async create(input: CreateBanInput): Promise<Ban> {
@@ -114,35 +116,60 @@ export class AdminBansResource extends BaseResource {
   }
 
   /**
-   * Lift/remove a ban from an actor.
-   * Requires moderator or admin role `[M]`.
-   * Idempotent: Succeeds with HTTP 204 even if actor was not banned.
+   * Lift/remove a ban from an actor, platform-wide or for a single community.
+   * Requires `member.ban` at the relevant scope.
+   * Idempotent: Succeeds with HTTP 204 even if the actor was not banned.
    *
    * @param username - Username of the actor to unban
+   * @param community - Community name whose ban is lifted; omitted means the
+   *   platform-wide ban
    */
-  async remove(username: string): Promise<void> {
+  async remove(username: string, community?: string): Promise<void> {
     await this.transport.request<void>({
       method: "DELETE",
       path: `/admin/bans/${encodeURIComponent(username)}`,
+      query: community ? { community } : undefined,
     });
   }
 }
 
 /**
- * Role assignment management.
- * Corresponds to `/admin/roles` endpoint.
+ * Scoped permission management.
+ * Corresponds to `/admin/permissions` endpoint.
  */
-export class AdminRolesResource extends BaseResource {
+export class AdminPermissionsResource extends BaseResource {
   /**
-   * Assign or revoke an administrative/moderator role on an actor.
-   * Requires admin role `[X]` (moderator is not sufficient).
+   * Grant a scoped permission to an actor.
+   * Requires `role.grant` at the relevant scope.
    *
-   * @param input - Target username and role (`admin` | `moderator` | `null` to clear)
+   * @remarks
+   * Idempotent. `community` (a name) scopes the grant to that community;
+   * omitted or `null` means a global grant.
+   *
+   * @param input - Target username, dotted permission name, and optional community scope
    */
-  async set(input: SetRoleInput): Promise<void> {
+  async grant(input: SetPermissionInput): Promise<void> {
     await this.transport.request<void>({
-      method: "POST",
-      path: "/admin/roles",
+      method: "PUT",
+      path: "/admin/permissions",
+      body: input,
+    });
+  }
+
+  /**
+   * Revoke a scoped permission from an actor.
+   * Requires `role.grant` at the relevant scope.
+   *
+   * @remarks
+   * Idempotent. `community` (a name) scopes the revoke to that community;
+   * omitted or `null` means a global revoke.
+   *
+   * @param input - Target username, dotted permission name, and optional community scope
+   */
+  async revoke(input: SetPermissionInput): Promise<void> {
+    await this.transport.request<void>({
+      method: "DELETE",
+      path: "/admin/permissions",
       body: input,
     });
   }
@@ -193,7 +220,7 @@ export class AdminResource extends BaseResource {
   readonly reports: AdminReportsResource;
   readonly contents: AdminContentsResource;
   readonly bans: AdminBansResource;
-  readonly roles: AdminRolesResource;
+  readonly permissions: AdminPermissionsResource;
   readonly actions: AdminActionsResource;
 
   constructor(transport: BaseResource["transport"]) {
@@ -201,7 +228,7 @@ export class AdminResource extends BaseResource {
     this.reports = new AdminReportsResource(transport);
     this.contents = new AdminContentsResource(transport);
     this.bans = new AdminBansResource(transport);
-    this.roles = new AdminRolesResource(transport);
+    this.permissions = new AdminPermissionsResource(transport);
     this.actions = new AdminActionsResource(transport);
   }
 }

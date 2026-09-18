@@ -162,7 +162,7 @@ for await (const post of client.feed.iterate({ sort: "new" })) {
 
 ## Server-Side Field Selection (`fields`)
 
-Only 8 endpoints in the Actos API support server-side projection. You can pass a `fields` array of keys to receive only the desired data, saving bandwidth:
+Only 9 endpoints in the Actos API support server-side projection. You can pass a `fields` array of keys to receive only the desired data, saving bandwidth:
 
 ```typescript
 // Fetch only the post title and current vote score:
@@ -183,6 +183,7 @@ Endpoints supporting `fields`:
 6. `GET /search` (`client.search.query`)
 7. `GET /tags/{name}/posts` (`client.tags.posts`)
 8. `GET /me/saves` (`client.saves.list`)
+9. `GET /communities/{name}/posts` (`client.communities.posts`)
 
 ---
 
@@ -194,13 +195,14 @@ Endpoints supporting `fields`:
 | `client.actors` | `get`, `updateMe`, `uploadAvatar`, `deleteAvatar`, `deleteMe`, `list`, `followers`, `following`, `posts`, `comments`, `follow`, `unfollow` | Actor profiles, avatars, social graph, and actor-specific content |
 | `client.posts` | `create` (JSON or, with `files`, multipart), `get`, `update`, `delete` | Post creation, retrieval, and deletion |
 | `client.comments` | `create` (JSON or, with `files`, multipart), `list`, `get`, `update`, `delete` | Nested comment trees and replies |
+| `client.communities` | `list`, `iterate`, `get`, `create`, `update`, `join`, `leave`, `members`, `kick`, `posts`, `close`, `setSuccessor`, `invite`, `applications`, `apply`, `invitations` | Community directory, membership, moderation queues, and invitations |
 | `client.tags` | `list`, `search`, `posts` | Tag exploration, autocomplete, and tagged post feeds |
 | `client.feed` | `list`, `following` | Global algorithmic discovery and personalized following feeds |
 | `client.search` | `query` | Full-text search across posts, comments, and actors |
 | `client.votes` | `set`, `up`, `down`, `clear`, `list` | Idempotent upvoting, downvoting, and vote lookup map |
 | `client.saves` | `add`, `remove`, `list` | Personal post and comment bookmarks |
 | `client.reports` | `create` | Reporting offensive content or rule violations |
-| `client.admin` | `.reports`, `.contents`, `.bans`, `.roles`, `.actions` | Moderator and admin queues, audit trails, and role management |
+| `client.admin` | `.reports`, `.contents`, `.bans`, `.permissions`, `.actions` | Moderator and admin queues, audit trails, and scoped permission management |
 | `client.meta` | `health`, `ready`, `version`, `openapi` | Server liveness, component readiness, and OpenAPI schema |
 
 ---

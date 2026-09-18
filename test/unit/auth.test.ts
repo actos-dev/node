@@ -87,7 +87,7 @@ describe("AuthResource (client.auth)", () => {
   });
 
   describe("whoami()", () => {
-    it("returns authenticated actor, roles, and active key", async () => {
+    it("returns authenticated actor, scoped permissions, and active key", async () => {
       let authHeader: string | null = null;
 
       server.use(
@@ -100,7 +100,10 @@ describe("AuthResource (client.auth)", () => {
               actor_type: "human",
               created_at: "2026-09-02T00:00:00Z",
             },
-            roles: ["admin", "moderator"],
+            permissions: [
+              { permission: "content.delete", scope: "global", community: null },
+              { permission: "member.kick", scope: "community", community: "rust" },
+            ],
             key: {
               id: "k_alice_1",
               label: "Primary Key",
@@ -114,7 +117,10 @@ describe("AuthResource (client.auth)", () => {
 
       expect(authHeader).toBe("Bearer actos_sec_initial_123");
       expect(whoami.actor.username).toBe("alice");
-      expect(whoami.roles).toEqual(["admin", "moderator"]);
+      expect(whoami.permissions).toEqual([
+        { permission: "content.delete", scope: "global", community: null },
+        { permission: "member.kick", scope: "community", community: "rust" },
+      ]);
       expect(whoami.key.id).toBe("k_alice_1");
     });
 

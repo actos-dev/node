@@ -152,7 +152,7 @@ describe("AdminResource (client.admin)", () => {
   });
 
   describe("bans (client.admin.bans)", () => {
-    it("creates a ban for an actor", async () => {
+    it("creates a community-scoped ban for an actor", async () => {
       let capturedBody: unknown;
 
       server.use(
@@ -165,6 +165,7 @@ describe("AdminResource (client.admin)", () => {
               reason: "Repeated spamming",
               banned_at: "2026-09-03T00:00:00Z",
               expires_at: "2026-10-03T00:00:00Z",
+              community: "rust",
             },
             { status: 201 },
           );
@@ -175,51 +176,82 @@ describe("AdminResource (client.admin)", () => {
         username: "spammer_bot",
         reason: "Repeated spamming",
         expiresAt: "2026-10-03T00:00:00Z",
+        community: "rust",
+        deletePosts: true,
       });
 
       expect(capturedBody).toEqual({
         username: "spammer_bot",
         reason: "Repeated spamming",
         expires_at: "2026-10-03T00:00:00Z",
+        community: "rust",
+        delete_posts: true,
       });
       expect(ban.username).toBe("spammer_bot");
       expect(ban.reason).toBe("Repeated spamming");
+      expect(ban.community).toBe("rust");
     });
 
-    it("removes a ban idempotently", async () => {
+    it("removes a community-scoped ban idempotently", async () => {
       let unbannedUser: string | null = null;
+      let capturedCommunity: string | null = null;
 
       server.use(
-        http.delete(`${TEST_BASE_URL}/admin/bans/:username`, ({ params }) => {
+        http.delete(`${TEST_BASE_URL}/admin/bans/:username`, ({ request, params }) => {
           unbannedUser = params.username as string;
+          capturedCommunity = new URL(request.url).searchParams.get("community");
           return new HttpResponse(null, { status: 204 });
         }),
       );
 
-      await client.admin.bans.remove("rehabilitated_bot");
+      await client.admin.bans.remove("rehabilitated_bot", "rust");
       expect(unbannedUser).toBe("rehabilitated_bot");
+      expect(capturedCommunity).toBe("rust");
     });
   });
 
-  describe("roles (client.admin.roles)", () => {
-    it("assigns a role to an actor via POST /admin/roles", async () => {
+  describe("permissions (client.admin.permissions)", () => {
+    it("grants a scoped permission via PUT /admin/permissions", async () => {
       let capturedBody: unknown;
 
       server.use(
-        http.post(`${TEST_BASE_URL}/admin/roles`, async ({ request }) => {
+        http.put(`${TEST_BASE_URL}/admin/permissions`, async ({ request }) => {
           capturedBody = await request.json();
           return new HttpResponse(null, { status: 204 });
         }),
       );
 
-      await client.admin.roles.set({
+      await client.admin.permissions.grant({
         username: "mod_agent",
-        role: "moderator",
+        permission: "member.kick",
+        community: "rust",
       });
 
       expect(capturedBody).toEqual({
         username: "mod_agent",
-        role: "moderator",
+        permission: "member.kick",
+        community: "rust",
+      });
+    });
+
+    it("revokes a global permission via DELETE /admin/permissions", async () => {
+      let capturedBody: unknown;
+
+      server.use(
+        http.delete(`${TEST_BASE_URL}/admin/permissions`, async ({ request }) => {
+          capturedBody = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+
+      await client.admin.permissions.revoke({
+        username: "mod_agent",
+        permission: "content.delete",
+      });
+
+      expect(capturedBody).toEqual({
+        username: "mod_agent",
+        permission: "content.delete",
       });
     });
   });

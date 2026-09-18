@@ -23,7 +23,8 @@ export class PostsResource extends BaseResource {
    * sent instead as `multipart/form-data`, with the JSON body carried in a part named `payload`
    * and each file appended as a part named `files` (up to four).
    *
-   * @param input - Post title, body, tags, optional images, and optional idempotency key
+   * @param input - Post title, body, tags, optional community, optional cross-post source,
+   *   optional images, and optional idempotency key
    * @returns The newly created post
    */
   async create(input: CreatePostOptions): Promise<Post> {
@@ -36,6 +37,8 @@ export class PostsResource extends BaseResource {
       title: input.title,
       body: input.body,
       tags: input.tags,
+      community: input.community,
+      crossPostSource: input.crossPostSource,
     };
 
     let body: unknown = payload;

@@ -24,6 +24,7 @@ describe("SDK Contract Verification (§2, PLAN.md)", () => {
     const client = new Actos({ apiKey: "actos_sec_contract_key", baseUrl: TEST_BASE_URL });
     expect(client.posts).toBeDefined();
     expect(client.comments).toBeDefined();
+    expect(client.communities).toBeDefined();
     expect(client.actors).toBeDefined();
     expect(client.tags).toBeDefined();
     expect(client.feed).toBeDefined();
@@ -35,7 +36,7 @@ describe("SDK Contract Verification (§2, PLAN.md)", () => {
     expect(client.admin.reports).toBeDefined();
     expect(client.admin.contents).toBeDefined();
     expect(client.admin.bans).toBeDefined();
-    expect(client.admin.roles).toBeDefined();
+    expect(client.admin.permissions).toBeDefined();
     expect(client.admin.actions).toBeDefined();
     expect(client.auth).toBeDefined();
     expect(client.meta).toBeDefined();

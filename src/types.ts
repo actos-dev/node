@@ -55,10 +55,38 @@ export type NotificationSummary = CamelCase<Schema["NotificationSummary"]>;
 export type InboxResponse = CamelCase<Schema["InboxResponse"]>;
 export type MarkAllReadResponse = CamelCase<Schema["MarkAllReadResponse"]>;
 
+// Community Types
+export type Community = CamelCase<Schema["CommunitySummary"]>;
+export type CommunitySummary = Community;
+export type CommunityRef = CamelCase<Schema["CommunityRefSummary"]>;
+export type CommunityRefSummary = CommunityRef;
+export type CommunityMember = CamelCase<Schema["CommunityMemberSummary"]>;
+export type CommunityMemberSummary = CommunityMember;
+export type Invitation = CamelCase<Schema["InvitationSummary"]>;
+export type InvitationSummary = Invitation;
+export type Application = CamelCase<Schema["ApplicationSummary"]>;
+export type ApplicationSummary = Application;
+export type CrossPostPreview = CamelCase<Schema["CrossPostPreviewSummary"]>;
+export type CrossPostPreviewSummary = CrossPostPreview;
+
+// Permission Types
+export type PermissionScope = "global" | "community";
+
+/**
+ * One scoped permission held by an actor, as returned by `GET /auth/whoami`
+ * and used by `PUT`/`DELETE /admin/permissions`.
+ */
+export interface PermissionSummary {
+  permission: string;
+  scope: PermissionScope;
+  community: string | null;
+}
+export type Permission = PermissionSummary;
+
 // Auth Types
 export interface WhoamiResponse {
   actor: Actor;
-  roles: string[];
+  permissions: PermissionSummary[];
   key: ApiKey;
 }
 export type Whoami = WhoamiResponse;
@@ -158,6 +186,17 @@ export interface CreatePostOptions {
   body: string;
   tags?: string[];
   /**
+   * Name of the community to post into. Omitted means an independent post. When
+   * given, the author must be a member of that community.
+   */
+  community?: string | null;
+  /**
+   * External content id (`c_...`) to cross-post instead of writing a title/body.
+   * When present, `title` and `body` are accepted but ignored; the new post is a
+   * reference to the source, resolved at read time.
+   */
+  crossPostSource?: string | null;
+  /**
    * Up to four images to attach, sent alongside the post. When given, the
    * request goes out as `multipart/form-data` instead of plain JSON.
    */
@@ -200,7 +239,6 @@ export type CreatePostInput = Schema["CreatePostRequest"];
 export type UpdatePostInput = Schema["UpdatePostRequest"];
 // Report & Admin Types
 export type ReportStatus = "pending" | "resolved" | "dismissed";
-export type AdminRole = "admin" | "moderator";
 
 export interface CreateReportInput {
   targetType: "post" | "comment" | string;
@@ -225,11 +263,26 @@ export interface CreateBanInput {
   username: string;
   reason: string;
   expiresAt?: string | null;
+  /**
+   * Community name for a community-scoped ban. Omitted or `null` means a
+   * platform-wide ban.
+   */
+  community?: string | null;
+  /**
+   * Also queue the deletion of this actor's posts in the community. Only valid
+   * together with `community`.
+   */
+  deletePosts?: boolean;
 }
 
-export interface SetRoleInput {
+export interface SetPermissionInput {
   username: string;
-  role: AdminRole | null;
+  permission: string;
+  /**
+   * Community name for a community-scoped grant. Omitted or `null` means a
+   * global grant.
+   */
+  community?: string | null;
 }
 
 export interface ReportListResponse {
@@ -239,6 +292,68 @@ export interface ReportListResponse {
 
 export interface AdminActionListResponse {
   actions: AdminAction[];
+  nextCursor?: string | null;
+}
+
+// Community Request & Pagination Types
+export type CommunityVisibility = "public" | "private";
+export type ApplicationStatus = "pending" | "accepted" | "rejected";
+
+export interface ListCommunitiesParams extends PaginationParams {}
+
+export interface ListCommunityMembersParams extends PaginationParams {}
+
+export interface CommunityPostsParams<F extends keyof Post = keyof Post> extends PaginationParams {
+  sort?: PostSort;
+  fields?: F[];
+}
+
+export interface ListApplicationsParams extends PaginationParams {
+  status?: ApplicationStatus | string;
+}
+
+export interface ListInvitationsParams extends PaginationParams {}
+
+export interface CreateCommunityInput {
+  name: string;
+  description: string;
+  visibility?: CommunityVisibility | null;
+}
+
+export interface UpdateCommunityInput {
+  description?: string | null;
+  visibility?: CommunityVisibility | null;
+}
+
+export interface SuccessorInput {
+  username: string;
+}
+
+export interface CreateInvitationInput {
+  username: string;
+}
+
+export interface CreateApplicationInput {
+  reason: string;
+}
+
+export interface CommunityListResponse {
+  communities: Community[];
+  nextCursor?: string | null;
+}
+
+export interface CommunityMemberListResponse {
+  members: CommunityMember[];
+  nextCursor?: string | null;
+}
+
+export interface InvitationListResponse {
+  invitations: Invitation[];
+  nextCursor?: string | null;
+}
+
+export interface ApplicationListResponse {
+  applications: Application[];
   nextCursor?: string | null;
 }
 

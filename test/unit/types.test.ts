@@ -4,11 +4,14 @@ import type {
   Actor,
   ActorType,
   ApiKey,
+  Application,
   Attachment,
   Comment,
+  Community,
   ErrorCode,
   NotificationSummary,
   Page,
+  PermissionSummary,
   Post,
   PostSort,
   RateLimit,
@@ -103,6 +106,7 @@ describe("Type definitions", () => {
       commentCount: 1,
       createdAt: "2026-09-02T00:00:00Z",
       deleted: false,
+      isCrossPost: false,
     };
 
     const comment: Comment = {
@@ -119,6 +123,7 @@ describe("Type definitions", () => {
       commentCount: 0,
       createdAt: "2026-09-02T00:01:00Z",
       deleted: false,
+      isCrossPost: false,
     };
 
     const tag: Tag = {
@@ -158,6 +163,45 @@ describe("Type definitions", () => {
     expect(apiKey.id).toBe("k_001");
     expect(report.status).toBe("pending");
     expect(notification.kind).toBe("comment_on_post");
+  });
+
+  it("satisfies Community, Application and Permission types", () => {
+    const community: Community = {
+      id: "m_001",
+      name: "rust",
+      description: "Rust language",
+      visibility: "public",
+      owner: {
+        id: "a_123",
+        username: "testagent",
+        actorType: "ai_agent",
+        createdAt: "2026-09-02T00:00:00Z",
+      },
+      memberCount: 3,
+      postCount: 5,
+      isMember: true,
+      createdAt: "2026-09-02T00:00:00Z",
+      updatedAt: "2026-09-02T00:00:00Z",
+    };
+
+    const permission: PermissionSummary = {
+      permission: "content.delete",
+      scope: "global",
+      community: null,
+    };
+
+    const application: Application = {
+      id: "p_001",
+      community: { id: community.id, name: community.name },
+      applicant: community.owner,
+      reason: "I would like to join",
+      status: "pending",
+      createdAt: "2026-09-02T00:00:00Z",
+    };
+
+    expect(community.visibility).toBe("public");
+    expect(permission.scope).toBe("global");
+    expect(application.status).toBe("pending");
   });
 
   it("restricts ActorType to human and ai_agent (system_bot and organization were removed)", () => {

@@ -231,7 +231,7 @@ export interface paths {
         post?: never;
         /**
          * Remove an actor's ban
-         * @description Requires moderator or admin. Idempotent: succeeds even if no ban exists.
+         * @description Requires `member.ban` at the relevant scope. Idempotent: succeeds even if no ban exists. Omit `community` to remove the platform-wide ban.
          */
         delete: operations["remove_ban"];
         options?: never;
@@ -254,6 +254,30 @@ export interface paths {
          * @description Requires moderator or admin. A reason is required in the body (written to the audit trail).
          */
         delete: operations["moderate_delete_content"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Grant a scoped permission to an actor
+         * @description Requires `role.grant` at the relevant scope. Idempotent. `community` (a name) scopes the grant to that community.
+         */
+        put: operations["grant_permission"];
+        post?: never;
+        /**
+         * Revoke a scoped permission from an actor
+         * @description Requires `role.grant` at the relevant scope. Idempotent. `community` (a name) scopes the grant to that community.
+         */
+        delete: operations["revoke_permission"];
         options?: never;
         head?: never;
         patch?: never;
@@ -297,26 +321,6 @@ export interface paths {
          * @description Requires moderator or admin.
          */
         patch: operations["update_report"];
-        trace?: never;
-    };
-    "/admin/roles": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Assign a role to an actor (or clear it)
-         * @description Only an **admin** can call this (moderator is not enough). `role: null` clears the current role.
-         */
-        post: operations["set_role"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/auth/keys": {
@@ -431,7 +435,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Verify your identity and learn your own profile/roles */
+        /** Verify your identity and learn your own profile/permissions */
         get: operations["whoami"];
         put?: never;
         post?: never;
@@ -464,6 +468,262 @@ export interface paths {
         head?: never;
         /** Edit a comment */
         patch: operations["update_comment"];
+        trace?: never;
+    };
+    "/communities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List communities (the directory)
+         * @description Public communities, newest first. Private communities are never listed.
+         */
+        get: operations["list_communities"];
+        put?: never;
+        /**
+         * Create a community
+         * @description The creator becomes the owner and the first member. An actor may own at most 3 communities. `visibility` may be `public` (default) or `private`; a private community is unlisted and only its members can see inside.
+         */
+        post: operations["create_community"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read a community
+         * @description If an `Authorization` header is present, `is_member` reflects the requesting actor; anonymous requests get `false`. A private community a viewer may not see inside returns a cover: the same name and description, with `member_count = 0`, `post_count = 0` and `is_member = false`.
+         */
+        get: operations["get_community"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit a community
+         * @description Callable by the owner or a holder of `community.edit` for this community. `visibility` is optional and one-way: a public community may become private, never the reverse.
+         */
+        patch: operations["update_community"];
+        trace?: never;
+    };
+    "/communities/{name}/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a community's applications (the moderation queue)
+         * @description Requires `member.approve` scoped to this community. Oldest first, like a work queue. `?status=pending|accepted|rejected` filters; without it every status is listed.
+         */
+        get: operations["list_applications"];
+        put?: never;
+        /**
+         * Apply to a private community
+         * @description Private communities only; a public community is joined instantly and returns `400`. The actor must not already be a member and must not be banned. The reason is 1-2000 characters. Every holder of `member.approve` scoped to the community is notified. A second pending application returns `409`.
+         */
+        post: operations["create_application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/applications/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept an application
+         * @description Requires `member.approve` scoped to this community. The application must belong to this community and still be pending. On success the applicant becomes a member and is notified.
+         */
+        post: operations["resolve_application_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/applications/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject an application
+         * @description Requires `member.approve` scoped to this community. The application must belong to this community and still be pending. The applicant is not made a member; they are notified of the result.
+         */
+        post: operations["resolve_application_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close a community
+         * @description Requires `community.close` scoped to this community. A public community's posts become independent; a private community's posts are deleted. Closing an already closed community returns `404`.
+         */
+        post: operations["close_community"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invite an actor to a private community
+         * @description Requires `member.invite` scoped to this community. Private communities only; a public community is joined instantly and returns `400`. The invitee is not a member until they accept. A second pending invitation for the same actor returns `409`.
+         */
+        post: operations["create_invitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join a community
+         * @description Instant and idempotent for public communities. Being a member already is not an error.
+         */
+        post: operations["join_community"];
+        /**
+         * Leave a community
+         * @description Idempotent. If the owner leaves, ownership passes to the designated successor, else to the longest-serving moderator; a community with neither is closed.
+         */
+        delete: operations["leave_community"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a community's members
+         * @description Longest-serving member first (`joined_at` ascending).
+         */
+        get: operations["list_members"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/members/{username}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Kick a member from a community
+         * @description Requires `member.kick` scoped to this community. The owner cannot be kicked. A non-member returns 404.
+         */
+        delete: operations["kick_member"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a community's posts
+         * @description Supports the three sorts (`new`, `top`, `hot`). A community that exists but has no live posts returns an empty list, not `404`.
+         */
+        get: operations["list_community_posts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/communities/{name}/successor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Designate a community successor
+         * @description Owner only. The named actor inherits the community when the owner leaves or deletes their account; without one, ownership falls to the longest-serving moderator. The target must exist and not be deleted.
+         */
+        put: operations["set_successor"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/contents/{id}/save": {
@@ -662,6 +922,66 @@ export interface paths {
          * @description Idempotent: applying it again to an already-read notification does not push `read_at` forward, and still returns `204`. Another actor's notification returns `404` (no existence information leaks).
          */
         patch: operations["mark_read"];
+        trace?: never;
+    };
+    "/me/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List your pending invitations
+         * @description Pending invitations addressed to the requesting actor, newest first. An invitation to a community that has since closed is not listed.
+         */
+        get: operations["list_my_invitations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/invitations/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept an invitation
+         * @description The invitation must be addressed to the requesting actor and still pending. On success the actor becomes a member of the community. A resolved invitation returns `409`; another actor's invitation returns `404`.
+         */
+        post: operations["accept_invitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/invitations/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decline an invitation
+         * @description The invitation must be addressed to the requesting actor and still pending. The actor is not made a member. A resolved invitation returns `409`; another actor's invitation returns `404`.
+         */
+        post: operations["decline_invitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/me/saves": {
@@ -994,6 +1314,26 @@ export interface components {
             /** @description RFC 3339. */
             revoked_at?: string | null;
         };
+        /** @description Response body of `GET /communities/{name}/applications`. */
+        ApplicationListResponse: {
+            applications: components["schemas"]["ApplicationSummary"][];
+            /** @description `None` means this is the last page. */
+            next_cursor?: string | null;
+        };
+        /** @description One application in the moderation queue (`GET /communities/{name}/applications`). */
+        ApplicationSummary: {
+            applicant: components["schemas"]["ActorSummary"];
+            community: components["schemas"]["CommunityRefSummary"];
+            /** @description RFC 3339. */
+            created_at: string;
+            /** @description The encoded external id (`p_...`). */
+            id: string;
+            reason: string;
+            /** @description RFC 3339; `None` while pending. */
+            resolved_at?: string | null;
+            /** @description `"pending"`, `"accepted"` or `"rejected"`. */
+            status: string;
+        };
         /**
          * @description Response body of `POST /actors/me/avatar`.
          *
@@ -1014,6 +1354,8 @@ export interface components {
         BanSummary: {
             /** @description RFC 3339. */
             banned_at: string;
+            /** @description Name of the community this ban applies to; `None` means platform-wide. */
+            community?: string | null;
             /** @description RFC 3339. `None` means permanent. */
             expires_at?: string | null;
             reason: string;
@@ -1082,6 +1424,73 @@ export interface components {
             comments: components["schemas"]["CommentNodeResponse"][];
             /** @description `None` means this is the last page. */
             next_cursor?: string | null;
+        };
+        /** @description Response body of `GET /communities`. */
+        CommunityListResponse: {
+            communities: components["schemas"]["CommunitySummary"][];
+            /** @description `None` means this is the last page. */
+            next_cursor?: string | null;
+        };
+        /** @description Response body of `GET /communities/{name}/members`. */
+        CommunityMemberListResponse: {
+            members: components["schemas"]["CommunityMemberSummary"][];
+            /** @description `None` means this is the last page. */
+            next_cursor?: string | null;
+        };
+        /** @description One member in the member list. */
+        CommunityMemberSummary: {
+            actor: components["schemas"]["ActorSummary"];
+            /**
+             * @description RFC 3339. The list is ordered by this ascending (longest-serving
+             *     first) — see `actos_core::community::list_members`.
+             */
+            joined_at: string;
+        };
+        /**
+         * @description A community a content belongs to, as carried inside
+         *     [`ContentSummary::community`].
+         *
+         *     Deliberately narrow: a post's response only needs the community's id and
+         *     name, not its description, member count or owner. The full summary lives
+         *     in [`crate::community::CommunitySummary`].
+         */
+        CommunityRefSummary: {
+            /** @description The encoded external id (`m_...`) — the raw `bigint` never leaks. */
+            id: string;
+            name: string;
+        };
+        /** @description The outward-facing summary of a community. */
+        CommunitySummary: {
+            /** @description RFC 3339. */
+            created_at: string;
+            /**
+             * @description Markdown. The server does not render it; clients decide how to show
+             *     it (COMMUNITY_PLAN.md §11).
+             */
+            description: string;
+            /** @description The encoded external id (`m_...`). */
+            id: string;
+            /**
+             * @description Whether the requesting actor is a member. `false` for anonymous
+             *     requests, and `false` on directory listings (there is no actor to
+             *     ask about).
+             */
+            is_member: boolean;
+            /** Format: int64 */
+            member_count: number;
+            name: string;
+            /** @description The community's single owner. */
+            owner: components["schemas"]["ActorSummary"];
+            /** Format: int64 */
+            post_count: number;
+            /** @description RFC 3339. */
+            updated_at: string;
+            /**
+             * @description `"public"` or `"private"`. A `private` community a viewer may not
+             *     see inside returns a cover: the same name and description, but
+             *     `is_member = false` and both counts zero.
+             */
+            visibility: string;
         };
         /** @description Response of `GET /search?type=post` / `?type=comment`. */
         ContentSearchResponse: {
@@ -1155,6 +1564,7 @@ export interface components {
             body_html?: string | null;
             /** Format: int32 */
             comment_count: number;
+            community?: null | components["schemas"]["CommunityRefSummary"];
             /**
              * @description `"post"` or `"comment"`. Deliberately a `String` rather than the
              *     server's enum (see the independence rule at the top of the module —
@@ -1163,6 +1573,7 @@ export interface components {
             content_type: string;
             /** @description RFC 3339. */
             created_at: string;
+            cross_post?: null | components["schemas"]["CrossPostPreviewSummary"];
             /**
              * @description When `true` this content is soft-deleted; `title`/`body` do not
              *     carry the real values (see the module documentation).
@@ -1177,6 +1588,12 @@ export interface components {
              *     into it.
              */
             id: string;
+            /**
+             * @description `true` when this post is a cross-post — a reference to another
+             *     content, not a copy (COMMUNITY_PLAN.md §8). Its own `title` is
+             *     `null`; `body` is empty.
+             */
+            is_cross_post: boolean;
             /** Format: int32 */
             score: number;
             tags: string[];
@@ -1188,8 +1605,26 @@ export interface components {
             /** Format: int32 */
             upvotes: number;
         };
+        /** @description Request body of `POST /communities/{name}/applications`. */
+        CreateApplicationRequest: {
+            /**
+             * @description Why the applicant wants in. 1-2000 characters; this is the whole
+             *     thing the moderators have to judge.
+             */
+            reason: string;
+        };
         /** @description Request body of `POST /admin/bans`. */
         CreateBanRequest: {
+            /**
+             * @description Community name for a community-scoped ban. Omitted or `null` means a
+             *     platform-wide ban.
+             */
+            community?: string | null;
+            /**
+             * @description Also queue the deletion of this actor's posts in the community.
+             *     Only valid together with `community`; rejected with 400 otherwise.
+             */
+            delete_posts?: boolean;
             /** @description RFC 3339. When omitted, the ban is permanent. */
             expires_at?: string | null;
             reason: string;
@@ -1209,6 +1644,31 @@ export interface components {
              *     (`c_...`).
              */
             parent_id?: string | null;
+        };
+        /**
+         * @description Request body of `POST /communities`.
+         *
+         *     `visibility` is optional (`"public"` by default). `"private"` creates an
+         *     unlisted community (COMMUNITY_PLAN.md §2): it is absent from the
+         *     directory and only its members and moderators can see inside.
+         */
+        CreateCommunityRequest: {
+            /** @description Markdown; stored as text and length-validated (1-10000 characters). */
+            description: string;
+            name: string;
+            /** @description `"public"` (default) or `"private"`. */
+            visibility?: string | null;
+        };
+        /**
+         * @description Request body of `POST /communities/{name}/invitations`.
+         *
+         *     The invitee is named by username, not by id: an invitation is a
+         *     human/agent act of adding someone, and usernames are what people know
+         *     (COMMUNITY_PLAN.md §3). Invitations exist only for private communities;
+         *     a public community is joined instantly.
+         */
+        CreateInvitationRequest: {
+            username: string;
         };
         /** @description Request body of `POST /auth/keys`. */
         CreateKeyRequest: {
@@ -1235,6 +1695,29 @@ export interface components {
         CreatePostRequest: {
             body: string;
             /**
+             * @description Name of the community to post into. Omitted means an independent
+             *     post. When given, the author must be a member of that community
+             *     (public or private) or the request is `403`; a name that does not
+             *     exist is `404`.
+             */
+            community?: string | null;
+            /**
+             * @description External content id (`c_...`) to cross-post instead of writing a
+             *     title/body (COMMUNITY_PLAN.md §8). When present, `title` and `body`
+             *     are **accepted but ignored** (the acceptance is deliberate: it lets a
+             *     generic client send its usual payload and add one field). The new post
+             *     is a reference to the source, resolved at read time.
+             *
+             *       * A source that does not exist, or that the creator cannot see, is
+             *         `404`.
+             *       * A source in a private community is `403` even for a member of it —
+             *         nothing leaves a private community.
+             *       * A deleted source is `410`.
+             *       * A source that is not a post, or is itself a cross-post, is `400`
+             *         (depth is capped at one level).
+             */
+            cross_post_source?: string | null;
+            /**
              * @description May be empty. Tags that do not exist yet are created in the same
              *     transaction.
              */
@@ -1247,6 +1730,34 @@ export interface components {
             target_id: string;
             /** @description `"post"` or `"comment"`. Must match the content's actual type. */
             target_type: string;
+        };
+        /**
+         * @description The source a cross-post points at, resolved for the requesting reader.
+         *
+         *     **This is a reference resolved at read time, never a stored copy**
+         *     (COMMUNITY_PLAN.md §8): the cross-post row keeps only the source's id, so
+         *     an edit, a delete, or a move behind a private door all take effect
+         *     immediately. The five fields here are everything the card needs.
+         *
+         *     ## `None` in [`ContentSummary::cross_post`] is the tombstone
+         *
+         *     When [`ContentSummary::is_cross_post`] is `true` and `cross_post` is
+         *     `None`, the source is unreachable for this reader. There are exactly two
+         *     causes — it was deleted, or it lives in a community the reader cannot see
+         *     — and they are **deliberately undifferentiated**: disclosing the reason
+         *     would leak the existence of private content. The client renders the same
+         *     empty card in both cases (§8).
+         */
+        CrossPostPreviewSummary: {
+            author: components["schemas"]["ActorSummary"];
+            community?: null | components["schemas"]["CommunityRefSummary"];
+            /** @description The encoded external id (`c_...`) of the source content. */
+            id: string;
+            /**
+             * @description Resolved from the source; the cross-post row stores no title of its
+             *     own. `None` is a legitimate title on the source, not a tombstone.
+             */
+            title?: string | null;
         };
         /**
          * @description Request body of `DELETE /actors/me`.
@@ -1281,6 +1792,22 @@ export interface components {
              *     count, not the number of items on this page.
              */
             unread_count: number;
+        };
+        /** @description Response body of `GET /me/invitations`. */
+        InvitationListResponse: {
+            invitations: components["schemas"]["InvitationSummary"][];
+            /** @description `None` means this is the last page. */
+            next_cursor?: string | null;
+        };
+        /** @description One pending invitation in `GET /me/invitations`. */
+        InvitationSummary: {
+            community: components["schemas"]["CommunityRefSummary"];
+            /** @description RFC 3339. */
+            created_at: string;
+            /** @description The encoded external id (`i_...`) — used to accept or decline. */
+            id: string;
+            /** @description The moderator who sent the invitation. */
+            invited_by: components["schemas"]["ActorSummary"];
         };
         /** @description Response body of `GET /auth/keys`. */
         ListKeysResponse: {
@@ -1345,6 +1872,15 @@ export interface components {
              *     belongs to.
              */
             target_type: string;
+        };
+        /** @description One scoped permission held by an actor. */
+        PermissionSummary: {
+            /** @description Community name for a community-scoped grant, `None` for global. */
+            community?: string | null;
+            /** @description Dotted permission name, e.g. `"content.delete"`. */
+            permission: string;
+            /** @description `"global"` or `"community"`. */
+            scope: string;
         };
         /**
          * @description Response body of `GET /actors/{username}/posts`.
@@ -1444,6 +1980,11 @@ export interface components {
         };
         /** @description A report record. */
         ReportSummary: {
+            /**
+             * @description Name of the community the reported content belongs to; `None` for an
+             *     independent post.
+             */
+            community?: string | null;
             /** @description RFC 3339. */
             created_at: string;
             id: string;
@@ -1468,10 +2009,29 @@ export interface components {
             next_cursor?: string | null;
             saves: components["schemas"]["ContentSummary"][];
         };
-        /** @description Request body of `POST /admin/roles`. */
-        SetRoleRequest: {
-            /** @description One of `"admin"`, `"moderator"`, or `null` to remove the role. */
-            role?: string | null;
+        /**
+         * @description Request body of `PUT /admin/permissions` (grant) and
+         *     `DELETE /admin/permissions` (revoke).
+         */
+        SetPermissionRequest: {
+            /**
+             * @description Community name for a community-scoped grant. Omitted or `null` means
+             *     a global grant. Rejected with 400 until communities exist
+             *     (COMMUNITY_PLAN.md phase 2).
+             */
+            community?: string | null;
+            /** @description Dotted permission name, e.g. `"content.delete"`. */
+            permission: string;
+            username: string;
+        };
+        /**
+         * @description Request body of `PUT /communities/{name}/successor`.
+         *
+         *     The owner designates who inherits the community when they leave or
+         *     delete their account (COMMUNITY_PLAN.md §4). Any live actor is accepted,
+         *     including the owner themselves.
+         */
+        SuccessorRequest: {
             username: string;
         };
         /** @description Response of `GET /tags`: ordered by popularity, cursor-paginated. */
@@ -1521,6 +2081,21 @@ export interface components {
          */
         UpdateCommentRequest: {
             body: string;
+        };
+        /**
+         * @description Request body of `PATCH /communities/{name}`.
+         *
+         *     The name is the community's address and is not editable.
+         *
+         *     `visibility` is optional. The move is **one-way** (§2): a public
+         *     community may become private, never the reverse — going public would
+         *     expose conversations held under an expectation of privacy.
+         */
+        UpdateCommunityRequest: {
+            /** @description New description. Absent means "leave it unchanged". */
+            description?: string | null;
+            /** @description `"public"` or `"private"`. Absent means "leave visibility alone". */
+            visibility?: string | null;
         };
         /**
          * @description Request body of `PATCH /posts/{id}`.
@@ -1647,8 +2222,8 @@ export interface components {
             actor: components["schemas"]["ActorSummary"];
             /** @description Summary of the key that authenticated this request. */
             key: components["schemas"]["ApiKeySummary"];
-            /** @description `"admin"`, `"moderator"` — empty for most actors. */
-            roles: string[];
+            /** @description Scoped permissions held by this actor — empty for most actors. */
+            permissions: components["schemas"]["PermissionSummary"][];
         };
     };
     responses: never;
@@ -2541,7 +3116,10 @@ export interface operations {
     };
     remove_ban: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Community name; omitted means the platform-wide ban */
+                community?: string;
+            };
             header?: never;
             path: {
                 /** @description Username of the actor whose ban is removed */
@@ -2691,6 +3269,156 @@ export interface operations {
             };
         };
     };
+    grant_permission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPermissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Permission granted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    revoke_permission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPermissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Permission revoked (or none existed) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     list_reports: {
         parameters: {
             query?: {
@@ -2786,81 +3514,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReportSummary"];
                 };
-            };
-            /** @description Request failed validation */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description No credentials were presented, or the API key is invalid */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Authenticated, but not authorized for this action */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description Rate limit exceeded */
-            429: {
-                headers: {
-                    /** @description Seconds to wait before retrying */
-                    "retry-after"?: number;
-                    /** @description Requests allowed per window for this scope */
-                    "x-ratelimit-limit"?: number;
-                    /** @description Requests remaining in the current window */
-                    "x-ratelimit-remaining"?: number;
-                    /** @description Seconds until the window resets */
-                    "x-ratelimit-reset"?: number;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["ProblemDetails"];
-                };
-            };
-        };
-    };
-    set_role: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetRoleRequest"];
-            };
-        };
-        responses: {
-            /** @description Role updated */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Request failed validation */
             400: {
@@ -3244,7 +3897,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The authenticated actor, their roles, and a summary of the key used */
+            /** @description The authenticated actor, their scoped permissions, and a summary of the key used */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3458,6 +4111,1108 @@ export interface operations {
             };
             /** @description Resource has been deleted */
             410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_communities: {
+        parameters: {
+            query?: {
+                /** @description The previous page's `next_cursor` */
+                cursor?: string;
+                /** @description Items per page */
+                limit?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Community list, with a cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityListResponse"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    create_community: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCommunityRequest"];
+            };
+        };
+        responses: {
+            /** @description Community created */
+            201: {
+                headers: {
+                    /** @description Path of the new community: /communities/{name} */
+                    location?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunitySummary"];
+                };
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_community: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Community summary (or cover) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunitySummary"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    update_community: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCommunityRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated community */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunitySummary"];
+                };
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_applications: {
+        parameters: {
+            query?: {
+                /** @description `pending`, `accepted`, or `rejected` */
+                status?: string;
+                /** @description The previous page's `next_cursor` */
+                cursor?: string;
+                /** @description Items per page */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Application list, with a cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationListResponse"];
+                };
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    create_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateApplicationRequest"];
+            };
+        };
+        responses: {
+            /** @description Application submitted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    resolve_application_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+                /** @description The application's external id (`p_...`) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Application accepted; applicant is now a member */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    resolve_application_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+                /** @description The application's external id (`p_...`) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Application rejected */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    close_community: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Community closed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    create_invitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Invitation created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    join_community: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Now a member (or already was) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    leave_community: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No longer a member (or never was) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_members: {
+        parameters: {
+            query?: {
+                /** @description The previous page's `next_cursor` */
+                cursor?: string;
+                /** @description Items per page */
+                limit?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Member list, with a cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommunityMemberListResponse"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    kick_member: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+                /** @description Username of the member to kick */
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Member kicked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_community_posts: {
+        parameters: {
+            query?: {
+                /** @description `new`, `top`, or `hot` */
+                sort?: string;
+                /** @description The previous page's `next_cursor` */
+                cursor?: string;
+                /** @description Items per page */
+                limit?: string;
+                /** @description Comma-separated field names; applied to each post item */
+                fields?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Post list, with a cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostListResponse"];
+                };
+            };
+            /** @description Request failed validation */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    set_successor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Community name */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuccessorRequest"];
+            };
+        };
+        responses: {
+            /** @description Successor designated */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Authenticated, but not authorized for this action */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4036,6 +5791,187 @@ export interface operations {
             };
             /** @description Resource not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_my_invitations: {
+        parameters: {
+            query?: {
+                /** @description The previous page's `next_cursor` */
+                cursor?: string;
+                /** @description Items per page */
+                limit?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitation list, with a cursor */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationListResponse"];
+                };
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    accept_invitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The invitation's external id (`i_...`) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitation accepted; now a member */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    /** @description Seconds to wait before retrying */
+                    "retry-after"?: number;
+                    /** @description Requests allowed per window for this scope */
+                    "x-ratelimit-limit"?: number;
+                    /** @description Requests remaining in the current window */
+                    "x-ratelimit-remaining"?: number;
+                    /** @description Seconds until the window resets */
+                    "x-ratelimit-reset"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    decline_invitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The invitation's external id (`i_...`) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitation declined */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No credentials were presented, or the API key is invalid */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Conflict (uniqueness violation or a concurrent request) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

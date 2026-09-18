@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-18
+
+Syncs the SDK with the backend's communities release (see the backend's
+`COMMUNITY_PLAN.md`). This is a breaking change to the wire contract.
+
+### Added
+
+- `client.communities` resource: `list`, `iterate`, `get`, `create`, `update`,
+  `join`, `leave`, `members`, `iterateMembers`, `kick`, `posts`, `iteratePosts`,
+  `close`, `setSuccessor`, `invite`, `applications`, `iterateApplications`,
+  `apply`, `acceptApplication`, `rejectApplication`, `invitations`,
+  `iterateInvitations`, `acceptInvitation`, `declineInvitation`.
+- `PermissionScope`, `PermissionSummary` / `Permission` types.
+- `Community`, `CommunityRef`, `CommunityMember`, `Invitation`, `Application` and
+  `CrossPostPreview` types (with `...Summary` aliases).
+- `CreateCommunityInput`, `UpdateCommunityInput`, `SuccessorInput`,
+  `CreateInvitationInput`, `CreateApplicationInput` and `SetPermissionInput`.
+- `community` and `crossPostSource` options on `client.posts.create()`.
+- `community` and `deletePosts` options on `client.admin.bans.create()`, and an
+  optional `community` argument on `client.admin.bans.remove()`.
+
+### Changed
+
+- Regenerated `src/generated/schema.d.ts` from the updated `openapi.json`.
+- `WhoamiResponse.roles` is replaced by `WhoamiResponse.permissions`, an array of
+  `PermissionSummary`.
+- `client.admin.roles` is replaced by `client.admin.permissions`, whose `grant`
+  and `revoke` methods call `PUT`/`DELETE /admin/permissions`.
+- `Post` gained `community`, `isCrossPost` and `crossPost`; `Ban` and `Report`
+  gained `community`.
+
+### Removed
+
+- `AdminRole` and `SetRoleInput`, and the `POST /admin/roles` call they backed.
+
 ## [0.2.0] - 2026-09-15
 
 Syncs the SDK with the backend's trust-level/uploads refactor (see the

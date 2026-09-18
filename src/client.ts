@@ -2,6 +2,7 @@ import { ActorsResource } from "./resources/actors.js";
 import { AdminResource } from "./resources/admin.js";
 import { AuthResource } from "./resources/auth.js";
 import { CommentsResource } from "./resources/comments.js";
+import { CommunitiesResource } from "./resources/communities.js";
 import { FeedResource } from "./resources/feed.js";
 import { InboxResource } from "./resources/inbox.js";
 import { MetaResource } from "./resources/meta.js";
@@ -36,6 +37,7 @@ export class Actos {
   readonly actors: ActorsResource;
   readonly posts: PostsResource;
   readonly comments: CommentsResource;
+  readonly communities: CommunitiesResource;
   readonly tags: TagsResource;
   readonly feed: FeedResource;
   readonly search: SearchResource;
@@ -53,6 +55,7 @@ export class Actos {
     this.actors = new ActorsResource(this.transport);
     this.posts = new PostsResource(this.transport);
     this.comments = new CommentsResource(this.transport);
+    this.communities = new CommunitiesResource(this.transport);
     this.tags = new TagsResource(this.transport);
     this.feed = new FeedResource(this.transport);
     this.search = new SearchResource(this.transport);

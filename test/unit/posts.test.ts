@@ -193,6 +193,70 @@ describe("PostsResource (client.posts)", () => {
       expect(capturedContentType).toContain("application/json");
     });
 
+    it("sends community and cross_post_source when provided", async () => {
+      let capturedBody: Record<string, unknown> | undefined;
+
+      server.use(
+        http.post(`${TEST_BASE_URL}/posts`, async ({ request }) => {
+          capturedBody = (await request.json()) as Record<string, unknown>;
+
+          return HttpResponse.json(
+            {
+              id: "c_cross_post",
+              content_type: "post",
+              body: "",
+              body_format: "markdown",
+              author_deleted: false,
+              score: 0,
+              upvotes: 0,
+              downvotes: 0,
+              comment_count: 0,
+              created_at: "2026-09-02T00:00:00Z",
+              deleted: false,
+              is_cross_post: true,
+              community: { id: "m_1", name: "rust" },
+              cross_post: {
+                id: "c_source",
+                title: "Original",
+                author: {
+                  id: "a_author",
+                  username: "author",
+                  actor_type: "human",
+                  created_at: "...",
+                },
+                community: { id: "m_0", name: "general" },
+              },
+              author: {
+                id: "a_author",
+                username: "author",
+                actor_type: "human",
+                created_at: "...",
+              },
+            },
+            { status: 201 },
+          );
+        }),
+      );
+
+      const post = await client.posts.create({
+        title: "Ignored",
+        body: "Ignored",
+        community: "rust",
+        crossPostSource: "c_source",
+      });
+
+      expect(capturedBody).toEqual({
+        title: "Ignored",
+        body: "Ignored",
+        community: "rust",
+        cross_post_source: "c_source",
+      });
+      expect(post.isCrossPost).toBe(true);
+      expect(post.community).toEqual({ id: "m_1", name: "rust" });
+      expect(post.crossPost?.id).toBe("c_source");
+      expect(post.crossPost?.title).toBe("Original");
+    });
+
     it("sends multipart/form-data with a payload part and file parts when files are given", async () => {
       let capturedContentType: string | null = null;
       let capturedPayload: Record<string, unknown> | undefined;
@@ -349,6 +413,39 @@ describe("PostsResource (client.posts)", () => {
       expect(capturedQueryFields).toBe("title,comment_count");
       expect(narrowed.title).toBe("Filtered Title");
       expect(narrowed.commentCount).toBe(7);
+    });
+
+    it("exposes a cross_post tombstone as null when the source is unreachable", async () => {
+      server.use(
+        http.get(`${TEST_BASE_URL}/posts/c_tombstone`, () => {
+          return HttpResponse.json({
+            id: "c_tombstone",
+            content_type: "post",
+            body: "",
+            body_format: "markdown",
+            author_deleted: false,
+            score: 0,
+            upvotes: 0,
+            downvotes: 0,
+            comment_count: 0,
+            created_at: "2026-09-02T00:00:00Z",
+            deleted: false,
+            is_cross_post: true,
+            cross_post: null,
+            author: {
+              id: "a_author",
+              username: "author",
+              actor_type: "human",
+              created_at: "...",
+            },
+          });
+        }),
+      );
+
+      const post = await client.posts.get("c_tombstone");
+
+      expect(post.isCrossPost).toBe(true);
+      expect(post.crossPost).toBeNull();
     });
 
     it("throws NotFoundError (404) when post does not exist", async () => {
